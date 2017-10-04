@@ -32,7 +32,7 @@ namespace Unfold
 
             for (int i = 0; i < _originalMeshData.Triangles.Count; i+= 3)
             {
-                _smartTriangles.Add(new SmartTriangle(new TriangleData(_originalMeshData, i), _newMeshData, 10));
+                _smartTriangles.Add(new SmartTriangle(new TriangleData(_originalMeshData, i), _newMeshData, 2));
             }
         }
 
@@ -56,7 +56,7 @@ namespace Unfold
         {
             foreach (var st in _smartTriangles)
             {
-                st.UpdateMeshData();
+                if(!st.UpdateMeshData()) break;
             }
         }
 

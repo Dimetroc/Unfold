@@ -61,6 +61,20 @@ namespace Unfold
             Vertices[triangle.T2] = triangle.V2;
         }
 
-      
+        public void UpdateTriangleVertices(TriangleData triangle, TriangleVertices vertices)
+        {
+            Vertices[triangle.T0] = vertices.V0;
+            Vertices[triangle.T1] = vertices.V1;
+            Vertices[triangle.T2] = vertices.V2;
+        }
+
+        public void UpdateZeroedTriangleVertices(TriangleData triangle)
+        {
+            Vertices[triangle.T0] = Vector3.zero;
+            Vertices[triangle.T1] = Vector3.zero;
+            Vertices[triangle.T2] = Vector3.zero;
+        }
+
+
     }
 }

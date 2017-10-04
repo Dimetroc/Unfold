@@ -112,5 +112,10 @@ namespace Unfold
             target[3].Uv2 = uvb;
         }
 
+        public static bool TheSame(this TriangleVertices a, TriangleVertices b, float delta)
+        {
+            var sqrDelta = delta * delta;
+            return (a.V0 - b.V0).sqrMagnitude < sqrDelta && (a.V1 - b.V1).sqrMagnitude < sqrDelta && (a.V2 - b.V2).sqrMagnitude < sqrDelta;
+        }
     }
 }
