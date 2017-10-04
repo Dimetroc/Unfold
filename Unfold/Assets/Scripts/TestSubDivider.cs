@@ -69,7 +69,7 @@ public class TestSubDivider : MonoBehaviour
         for (int i = 0; i < triangles.Length; i += 3)
         {
             SubDivideTriangles(trianglesCount);
-            SubDivideArray(trianglesCount, triangles, vertices, new Vector3(0,0.01f,0), ref _newVertices);
+            SubDivideArray(trianglesCount, triangles, vertices, ref _newVertices);
             SubDivideArray(trianglesCount, triangles, normals, ref _newNormals);
             SubDivideArray(trianglesCount, triangles, uv, ref _newUvs);
             trianglesCount++;
@@ -94,32 +94,6 @@ public class TestSubDivider : MonoBehaviour
         }
     }
 
-    private void SubDivideArray(int index, int[] triangles, Vector3[] source, Vector3 offset, ref Vector3[] target)
-    {
-        var v0 = source[triangles[index * 3 + 0]];
-        var v1 = source[triangles[index * 3 + 1]];
-        var v2 = source[triangles[index * 3 + 2]];
-        var va = (v0 + v1) / 2.0f;
-        var vb = (v1 + v2) / 2.0f;
-        var vc = (v2 + v0) / 2.0f;
-
-        target[index * 12 + 0] = v0 + offset * (index + 1);
-        target[index * 12 + 1] = va + offset * (index + 1);
-        target[index * 12 + 2] = vc + offset * (index + 1);
-
-        target[index * 12 + 3] = vc + offset * (index + 1) * 2;
-        target[index * 12 + 4] = va + offset * (index + 1) * 2;
-        target[index * 12 + 5] = v2 + offset * (index + 1) * 2;
-
-        target[index * 12 + 6] = va + offset * (index + 1) * 3;
-        target[index * 12 + 7] = vb + offset * (index + 1) * 3;
-        target[index * 12 + 8] = v2 + offset * (index + 1) * 3;
-
-        target[index * 12 + 9] = va + offset * (index + 1) * 4;
-        target[index * 12 + 10] = v1 + offset * (index + 1) * 4;
-        target[index * 12 + 11] = vb + offset * (index + 1) * 4;
-
-    }
 
     private void SubDivideArray(int index, int[] triangles, Vector3[] source, ref Vector3[] target)
     {
@@ -130,17 +104,19 @@ public class TestSubDivider : MonoBehaviour
         var vb = (v1 + v2) / 2.0f;
         var vc = (v2 + v0) / 2.0f;
 
+
+
         target[index * 12 + 0] = v0;
         target[index * 12 + 1] = va;
         target[index * 12 + 2] = vc;
 
         target[index * 12 + 3] = vc;
-        target[index * 12 + 4] = va;
+        target[index * 12 + 4] = vb;
         target[index * 12 + 5] = v2;
 
         target[index * 12 + 6] = va;
         target[index * 12 + 7] = vb;
-        target[index * 12 + 8] = v2;
+        target[index * 12 + 8] = vc;
 
         target[index * 12 + 9] = va;
         target[index * 12 + 10] = v1;
@@ -162,12 +138,12 @@ public class TestSubDivider : MonoBehaviour
         target[index * 12 + 2] = vc;
 
         target[index * 12 + 3] = vc;
-        target[index * 12 + 4] = va;
+        target[index * 12 + 4] = vb;
         target[index * 12 + 5] = v2;
 
         target[index * 12 + 6] = va;
         target[index * 12 + 7] = vb;
-        target[index * 12 + 8] = v2;
+        target[index * 12 + 8] = vc;
 
         target[index * 12 + 9] = va;
         target[index * 12 + 10] = v1;
