@@ -10,7 +10,7 @@ namespace Unfold
         private TriangleVertices _targetVertices;
         private const float DELTA = 0.1f;
         private const float SPEED = 10.0f;
-
+        private float _directionValue = 0.0f;
         private SmartTriangle[] _children;
 
         private readonly bool _hasChildren = false;
@@ -46,18 +46,19 @@ namespace Unfold
             _targetMeshData.SetTriangle(_triangle);
         }
 
-        public bool UpdateMeshData()
+        public bool UpdateMeshData(float unfoldValue)
         {
-            if(IsSet)return IsSet;
+            if(IsSet)return true;
 
             
 
             if (_hasChildren)
             {
-                UpdateChildren();
+                UpdateChildren(unfoldValue);
             }
             else
             {
+
                 if (_isFirst)
                 {
                     SetFirst();
@@ -65,13 +66,26 @@ namespace Unfold
                 }
                 else
                 {
-                    UpdateSelf();
+                    UpdateSelf(unfoldValue);
                 }
-
-                
             }
 
-            return false;
+            return IsSet;
+        }
+
+        public void UpdateUnfoldDirection(UnfoldDirection direction)
+        {
+            if (_hasChildren)
+            {
+                foreach (var child in _children)
+                {
+                    child.UpdateUnfoldDirection(direction);
+                }
+            }
+            else
+            {
+                _directionValue = direction.GetCentroidAnimationValue(_targetVertices.GetCentroid());
+            }
         }
 
         private void SetFirst()
@@ -79,22 +93,27 @@ namespace Unfold
             _currentVertices.SetToVector((_targetVertices + new Vector3(0, 10, 0)).GetCentroid());
         }
 
-        private void UpdateSelf()
+        private void UpdateSelf(float unfoldValue)
         {
+            if (unfoldValue < _directionValue)return;
+            
             _currentVertices.Lerp(_targetVertices, Time.deltaTime * SPEED);
             IsSet = _currentVertices.TheSame(_targetVertices, DELTA);
             if (IsSet) _currentVertices = _targetVertices;
+
             _targetMeshData.UpdateTriangleVertices(_triangle, _currentVertices);
         }
 
-        private void UpdateChildren()
+        private void UpdateChildren(float unfoldValue)
         {
+            IsSet = true;
+
             for (int i = 0; i < _children.Length; i++)
             {
-                if(! _children[i].UpdateMeshData())return;
+                IsSet = _children[i].UpdateMeshData(unfoldValue) && IsSet;
             }
 
-            IsSet = true;
+            
         }
 
     }
