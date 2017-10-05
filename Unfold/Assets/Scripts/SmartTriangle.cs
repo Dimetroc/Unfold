@@ -84,6 +84,11 @@ namespace Unfold
 
         public void Clear()
         {
+            if (_children != null && _children.Length != 0)
+            {
+                ClearChildren();
+            }
+
             _meshTriangle.ClearTriangle();
             _pool.ReturnTriangle(_meshTriangle);
             _pool = null;
@@ -97,15 +102,13 @@ namespace Unfold
 
         private void UpdateSelf()
         {
-            Profiler.BeginSample("New mesh triangle");
+
             if (_meshTriangle == null)
             {
-                Profiler.BeginSample("GetTriangle");
                 _meshTriangle = _pool.GetTriangle();
-                Profiler.EndSample();
                 _meshTriangle.UseTriangle(_triangle);
             }
-            Profiler.EndSample();
+
             _currentVertices.Lerp(_targetVertices, Time.deltaTime * SPEED);
             IsSet = _currentVertices.TheSame(_targetVertices, DELTA);
             if (IsSet) _currentVertices = _targetVertices;
