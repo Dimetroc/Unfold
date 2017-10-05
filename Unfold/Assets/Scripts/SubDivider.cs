@@ -5,7 +5,7 @@ namespace Unfold
     public static class SubDivider
     {
 
-        public static SmartTriangle[] SubDivideTriangle(TriangleData triangle, MeshData targetData, int subdivisionNumber)
+        public static SmartTriangle[] SubDivideTriangle(TriangleData triangle, TrianglesPool pool, int subdivisionNumber)
         {
             var tds = new TriangleData[]{new TriangleData(), new TriangleData(), new TriangleData(), new TriangleData()  };
 
@@ -18,7 +18,7 @@ namespace Unfold
 
             for (int i = 0; i < sts.Length; i++)
             {
-                sts[i] = new SmartTriangle(tds[i], targetData, subdivisionNumber);
+                sts[i] = new SmartTriangle(tds[i], pool, subdivisionNumber);
             }
 
             return sts;

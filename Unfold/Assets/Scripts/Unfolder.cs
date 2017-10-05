@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Unfold
 {
@@ -13,9 +14,15 @@ namespace Unfold
         private MeshData _originalMeshData;
         private MeshData _newMeshData;
 
+        private TrianglesPool _trianglesPool;
+
         private UnfoldDirection _unfoldDirection;
 
         private List<SmartTriangle> _smartTriangles;
+
+        private bool _allAreSet = false;
+        private float _directionValue = 0;
+
 
         [SerializeField] private Vector3 _direction;
         [SerializeField] private int _subDivisionNumber = 1;
@@ -27,14 +34,15 @@ namespace Unfold
             _mesh = _meshFilter.mesh;
             _originalMeshData = new MeshData(_mesh);
             _newMeshData = new MeshData();
+            _trianglesPool = new TrianglesPool(_newMeshData);
+
+            _meshFilter.mesh.Clear();
 
             GenerateTriangles();
 
-            SetNewDataToMesh();
-
             ProcessDirection();
 
-            StartCoroutine(UnfoldRoutine());
+            _directionValue = _unfoldDirection.Min;
         }
 
         private void ProcessDirection()
@@ -52,33 +60,22 @@ namespace Unfold
 
             for (int i = 0; i < _originalMeshData.Triangles.Count; i+= 3)
             {
-                _smartTriangles.Add(new SmartTriangle(new TriangleData(_originalMeshData, i), _newMeshData, _subDivisionNumber));
+                _smartTriangles.Add(new SmartTriangle(new TriangleData(_originalMeshData, i), _trianglesPool, _subDivisionNumber));
             }
         }
 
-        private void SetNewDataToMesh()
+
+        private void Update()
         {
-            
-            _meshFilter.mesh.SetVertices(_newMeshData.Vertices);
-            _meshFilter.mesh.SetNormals(_newMeshData.Normals);
-            _meshFilter.mesh.SetUVs(0,_newMeshData.Uvs);
-            _meshFilter.mesh.SetTriangles(_newMeshData.Triangles, 0);
-        }
-
-
-        private IEnumerator UnfoldRoutine()
-        {
-            Debug.Log(_unfoldDirection.Min);
-            Debug.Log(_unfoldDirection.Max);
-
-            var allAreSet = false;
-            var directionValue = _unfoldDirection.Min;
-            while (!allAreSet)
+            if(!_allAreSet)
             {
-                directionValue += Time.deltaTime * _unfoldSpeed;
-                allAreSet = UpdateTriangles(directionValue);
+                _directionValue += Time.deltaTime * _unfoldSpeed;
+                Profiler.BeginSample("UpdateTriangles");
+                _allAreSet = UpdateTriangles(_directionValue);
+                Profiler.EndSample();
+                Profiler.BeginSample("UpdateMesh");
                 UpdateMesh();
-                yield return null;
+                Profiler.EndSample();
             }
         }
 
@@ -96,6 +93,9 @@ namespace Unfold
         private void UpdateMesh()
         {
             _meshFilter.mesh.SetVertices(_newMeshData.Vertices);
+            _meshFilter.mesh.SetNormals(_newMeshData.Normals);
+            _meshFilter.mesh.SetUVs(0, _newMeshData.Uvs);
+            _meshFilter.mesh.SetTriangles(_newMeshData.Triangles, 0);
         }
     }
 }

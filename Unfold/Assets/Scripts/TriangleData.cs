@@ -22,9 +22,6 @@ namespace Unfold
         public Vector2 Uv1;
         public Vector2 Uv2;
 
-
-
-
         public TriangleData(MeshData data, int startIndex)
         {
             T0 = data.Triangles[startIndex];
@@ -42,6 +39,50 @@ namespace Unfold
             Uv0 = data.Uvs[T0];
             Uv1 = data.Uvs[T1];
             Uv2 = data.Uvs[T2];
+        }
+
+        public TriangleData(int startIndex)
+        {
+            T0 = startIndex;
+            T1 = startIndex + 1;
+            T2 = startIndex + 2;
+
+            V0 = V1 = V2 = Vector3.zero;
+
+            N0 = N1 = N2 = Vector3.zero;
+
+            Uv0 = Uv1 = Uv2 = Vector2.zero;
+        }
+
+        public void UpdateData(TriangleData data)
+        {
+            V0 = data.V0;
+            V1 = data.V1;
+            V2 = data.V2;
+
+            N0 = data.N0;
+            N1 = data.N1;
+            N2 = data.N2;
+
+            Uv0 = data.Uv0;
+            Uv1 = data.Uv1;
+            Uv2 = data.Uv2;
+        }
+
+        public void UpdateVertices(TriangleVertices vertices)
+        {
+            V0 = vertices.V0;
+            V1 = vertices.V1;
+            V2 = vertices.V2;
+        }
+
+        public void ClearData()
+        {
+            V0 = V1 = V2 = Vector3.zero;
+
+            N0 = N1 = N2 = Vector3.zero;
+
+            Uv0 = Uv1 = Uv2 = Vector2.zero;
         }
 
         public void UpdateTriangleIndex(int startIndex)

@@ -54,18 +54,26 @@ namespace Unfold
             Uvs.Add(triangle.Uv2);
         }
 
+        public void UpdateTriangleData(TriangleData triangle)
+        {
+            Vertices[triangle.T0] = triangle.V0;
+            Vertices[triangle.T1] = triangle.V1;
+            Vertices[triangle.T2] = triangle.V2;
+
+            Normals[triangle.T0] = triangle.N0;
+            Normals[triangle.T1] = triangle.N1;
+            Normals[triangle.T2] = triangle.N2;
+
+            Uvs[triangle.T0] = triangle.Uv0;
+            Uvs[triangle.T1] = triangle.Uv1;
+            Uvs[triangle.T2] = triangle.Uv2;
+        }
+
         public void UpdateTriangleVertices(TriangleData triangle)
         {
             Vertices[triangle.T0] = triangle.V0;
             Vertices[triangle.T1] = triangle.V1;
             Vertices[triangle.T2] = triangle.V2;
-        }
-
-        public void UpdateTriangleVertices(TriangleData triangle, TriangleVertices vertices)
-        {
-            Vertices[triangle.T0] = vertices.V0;
-            Vertices[triangle.T1] = vertices.V1;
-            Vertices[triangle.T2] = vertices.V2;
         }
 
         public void UpdateZeroedTriangleVertices(TriangleData triangle)
