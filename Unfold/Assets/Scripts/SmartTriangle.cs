@@ -20,23 +20,23 @@ namespace Unfold
         private bool _isFirst = true;
         public bool IsSet { get; private set; }
 
-        public SmartTriangle(TriangleData triangle, TrianglesPool pool, int subdivisionNumber)
+        public SmartTriangle(TriangleData triangle, TrianglesPool pool, float minimumArea)
         {
             IsSet = false;
             _triangle = triangle;
             _currentVertices = _targetVertices = new TriangleVertices(_triangle);
             _pool = pool;
 
-            _hasChildren = subdivisionNumber > 0;
+            _hasChildren = _targetVertices.GetArea() > minimumArea;
             if (_hasChildren)
             {
-                GenerateChildren(subdivisionNumber - 1);
+                GenerateChildren(minimumArea);
             }
         }
 
-        private void GenerateChildren(int subdivisionNumber)
+        private void GenerateChildren(float targetArea)
         {
-            _children = SubDivider.SubDivideTriangle(_triangle, _pool, subdivisionNumber);
+            _children = SubDivider.SubDivideTriangle(_triangle, _pool, targetArea);
         }
 
         public bool UpdateMeshData(float unfoldValue)

@@ -91,6 +91,7 @@ namespace Unfold
             T1 = startIndex + 1;
             T2 = startIndex + 2;
         }
+
     }
 
     public struct TriangleVertices
@@ -125,6 +126,15 @@ namespace Unfold
         public Vector3 GetCentroid()
         {
             return new Vector3((V0.x + V1.x + V2.x)/3.0f, (V0.y+ V1.y + V2.y) / 3.0f, (V0.z + V1.z + V2.z) / 3.0f);
+        }
+
+        public float GetArea()
+        {
+            var a = (V0 - V1).magnitude;
+            var b = (V1 - V2).magnitude;
+            var c = (V2 - V0).magnitude;
+            var s = (a + b + c) / 2.0f;
+            return Mathf.Sqrt(s * (s - a) * (s - b) * (s - c));
         }
 
         public void SetToVector(Vector3 vector)

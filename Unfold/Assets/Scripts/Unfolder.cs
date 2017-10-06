@@ -25,7 +25,7 @@ namespace Unfold
 
 
         [SerializeField] private Vector3 _direction;
-        [SerializeField] private int _subDivisionNumber = 1;
+        [SerializeField] private float _minimalArea = 1;
         [SerializeField] private float _unfoldSpeed = 10.0f;
          
         private void Awake()
@@ -60,7 +60,7 @@ namespace Unfold
 
             for (int i = 0; i < _originalMeshData.Triangles.Count; i+= 3)
             {
-                _smartTriangles.Add(new SmartTriangle(new TriangleData(_originalMeshData, i), _trianglesPool, _subDivisionNumber));
+                _smartTriangles.Add(new SmartTriangle(new TriangleData(_originalMeshData, i), _trianglesPool, _minimalArea));
             }
         }
 
