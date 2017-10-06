@@ -33,5 +33,16 @@ namespace Unfold
 
             return projectionMag;
         }
+
+        public float GetCentroidRadiusAnimationValue(Vector3 centroid)
+        {
+
+            //Debug.Log(centroid + "|" + projection + "|" + Vector3.Dot(projection, _direction) + "|" + projection.magnitude);
+            var projectionMag = centroid.magnitude;
+            Min = 0;
+            if (projectionMag > Max) Max = projectionMag;
+
+            return projectionMag;
+        }
     }
 }

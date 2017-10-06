@@ -78,7 +78,8 @@ namespace Unfold
             }
             else
             {
-                _directionValue = direction.GetCentroidAnimationValue(_targetVertices.GetCentroid());
+                //_directionValue = direction.GetCentroidAnimationValue(_targetVertices.GetCentroid());
+                _directionValue = direction.GetCentroidRadiusAnimationValue(_targetVertices.GetCentroid());
             }
         }
 
@@ -97,7 +98,8 @@ namespace Unfold
 
         private void SetFirst()
         {
-            _currentVertices.SetToVector((_targetVertices + new Vector3(0, 10, 0)).GetCentroid());
+            //_currentVertices.SetToVector((_targetVertices + new Vector3(0, 10, 0)).GetCentroid());
+            _currentVertices.SetToVector((_targetVertices ).GetCentroid());
         }
 
         private void UpdateSelf()
