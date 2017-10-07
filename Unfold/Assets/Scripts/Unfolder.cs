@@ -26,11 +26,13 @@ namespace Unfold
 
         #region Settings
         [SerializeField]
-        private Direction _direction;
+        private UnfoldDirections _direction;
         [SerializeField] 
         private float _minimalArea = 1;
         [SerializeField] 
         private float _unfoldSpeed = 10.0f;
+        [SerializeField] 
+        private bool _inverse;
         #endregion
 
         private void Awake()
@@ -49,10 +51,16 @@ namespace Unfold
 
         private void ProcessDirection()
         {
-            _unfoldDirection = new UnfoldDirection(_direction, GetCenter());
+            var center = GetCenter();
+            _unfoldDirection = new UnfoldDirection(_direction, center);
             foreach (var triangle in _smartTriangles)
             {
                 triangle.UpdateUnfoldDirection(_unfoldDirection);
+                if (_inverse)
+                {
+                    triangle.SetTarget(center);
+                    triangle.Show();
+                }
             }
             _directionValue = _unfoldDirection.Min;
         }
@@ -101,7 +109,10 @@ namespace Unfold
             var allAreSet = true;
             foreach (var st in _smartTriangles)
             {
-                if (!st.UpdateMeshData(directionValue)) allAreSet = false;
+                if (!st.UpdateMeshData(directionValue))
+                {
+                    allAreSet = false;
+                }
             }
 
             return allAreSet;

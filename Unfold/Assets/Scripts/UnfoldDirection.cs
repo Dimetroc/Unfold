@@ -2,12 +2,13 @@
 
 namespace Unfold
 {
-    public enum Direction
+    public enum UnfoldDirections
     {
         FromCenter,
+        ToCenter,
         FromTop,
-        FromLeft,
         FromBottom,
+        FromLeft,
         FromRight
     }
 
@@ -17,10 +18,10 @@ namespace Unfold
         public float Max { get; private set; }
         public float Min { get; private set; }
 
-        private readonly Direction _direction;
+        private readonly UnfoldDirections _direction;
         private readonly Vector3 _center;
 
-        public UnfoldDirection(Direction dir, Vector3 center)
+        public UnfoldDirection(UnfoldDirections dir, Vector3 center)
         {
             _direction = dir;
             _center = center;
@@ -54,15 +55,17 @@ namespace Unfold
         {
             switch (_direction)
             {
-                case Direction.FromCenter:
+                case UnfoldDirections.FromCenter:
                     return centroid - _center;
-                case Direction.FromTop:
+                case UnfoldDirections.ToCenter:
+                    return _center - centroid;
+                case UnfoldDirections.FromTop:
                     return new Vector3(0, -1, 0);
-                case Direction.FromLeft:
+                case UnfoldDirections.FromLeft:
                     return new Vector3(1, 0, 0);
-                case Direction.FromBottom:
+                case UnfoldDirections.FromBottom:
                     return new Vector3(0, 1, 0);
-                case Direction.FromRight:
+                case UnfoldDirections.FromRight:
                     return new Vector3(-1, 0, 0);
             }
             return Vector3.zero;
