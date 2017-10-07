@@ -5,6 +5,7 @@ using UnityEngine.Profiling;
 
 namespace Unfold
 {
+    
     [RequireComponent(typeof(MeshFilter))]
     public class Unfolder:MonoBehaviour
     {
@@ -20,14 +21,18 @@ namespace Unfold
 
         private List<SmartTriangle> _smartTriangles;
 
-        private bool _allAreSet = false;
-        private float _directionValue = 0;
+        private bool _allAreSet;
+        private float _directionValue;
 
+        #region Settings
+        [SerializeField]
+        private Direction _direction;
+        [SerializeField] 
+        private float _minimalArea = 1;
+        [SerializeField] 
+        private float _unfoldSpeed = 10.0f;
+        #endregion
 
-        [SerializeField] private Vector3 _direction;
-        [SerializeField] private float _minimalArea = 1;
-        [SerializeField] private float _unfoldSpeed = 10.0f;
-         
         private void Awake()
         {
             _meshFilter = GetComponent<MeshFilter>();
@@ -39,26 +44,38 @@ namespace Unfold
             _meshFilter.mesh.Clear();
 
             GenerateTriangles();
-
             ProcessDirection();
-
-            _directionValue = _unfoldDirection.Min;
         }
 
         private void ProcessDirection()
         {
-            _unfoldDirection = new UnfoldDirection(_direction);
+            _unfoldDirection = new UnfoldDirection(_direction, GetCenter());
             foreach (var triangle in _smartTriangles)
             {
                 triangle.UpdateUnfoldDirection(_unfoldDirection);
             }
+            _directionValue = _unfoldDirection.Min;
+        }
+
+        private Vector3 GetCenter()
+        {
+            var xSum = 0f;
+            var ySum = 0f;
+            var zSum = 0f;
+            foreach (var triangle in _smartTriangles)
+            {
+                xSum += triangle.GetCentroid().x;
+                ySum += triangle.GetCentroid().y;
+                zSum += triangle.GetCentroid().z;
+            }
+            return new Vector3(xSum / _smartTriangles.Count, ySum / _smartTriangles.Count, zSum / _smartTriangles.Count);
         }
 
         private void GenerateTriangles()
         {
             _smartTriangles = new List<SmartTriangle>();
 
-            for (int i = 0; i < _originalMeshData.Triangles.Count; i+= 3)
+            for (int i = 0; i < _originalMeshData.Triangles.Count; i += 3)
             {
                 _smartTriangles.Add(new SmartTriangle(new TriangleData(_originalMeshData, i), _trianglesPool, _minimalArea));
             }

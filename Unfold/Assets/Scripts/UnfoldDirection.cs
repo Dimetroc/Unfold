@@ -2,47 +2,70 @@
 
 namespace Unfold
 {
+    public enum Direction
+    {
+        FromCenter,
+        FromTop,
+        FromLeft,
+        FromBottom,
+        FromRight
+    }
+
+
     public class UnfoldDirection
     {
-        private readonly Vector3 _direction;
-
         public float Max { get; private set; }
         public float Min { get; private set; }
 
-        public UnfoldDirection(Vector3 direction)
+        private readonly Direction _direction;
+        private readonly Vector3 _center;
+
+        public UnfoldDirection(Direction dir, Vector3 center)
         {
-            _direction = direction.normalized;
-            Max = Min = 0;
+            _direction = dir;
+            _center = center;
         }
 
         public float GetCentroidAnimationValue(Vector3 centroid)
         {
-            
-            var projection = Vector3.Project(centroid, _direction);
-            //Debug.Log(centroid + "|" + projection + "|" + Vector3.Dot(projection, _direction) + "|" + projection.magnitude);
+            var dir = GetDirection(centroid).normalized;
+            var projection = Vector3.Project(centroid, dir);
             var projectionMag = projection.magnitude;
-            if (Vector3.Dot(projection, _direction) < 0)
+            if (Vector3.Dot(projection, dir) < 0)
             {
                 projectionMag *= -1;
-                if (projectionMag < Min) Min = projectionMag;
+                if (projectionMag < Min)
+                {
+                    Min = projectionMag;
+                }
             }
             else
             {
-                if (projectionMag > Max) Max = projectionMag;
+                if (projectionMag > Max)
+                {
+                    Max = projectionMag;
+                }
             }
 
             return projectionMag;
         }
 
-        public float GetCentroidRadiusAnimationValue(Vector3 centroid)
+        private Vector3 GetDirection(Vector3 centroid)
         {
-
-            //Debug.Log(centroid + "|" + projection + "|" + Vector3.Dot(projection, _direction) + "|" + projection.magnitude);
-            var projectionMag = centroid.magnitude;
-            Min = 0;
-            if (projectionMag > Max) Max = projectionMag;
-
-            return projectionMag;
+            switch (_direction)
+            {
+                case Direction.FromCenter:
+                    return centroid - _center;
+                case Direction.FromTop:
+                    return new Vector3(0, -1, 0);
+                case Direction.FromLeft:
+                    return new Vector3(1, 0, 0);
+                case Direction.FromBottom:
+                    return new Vector3(0, 1, 0);
+                case Direction.FromRight:
+                    return new Vector3(-1, 0, 0);
+            }
+            return Vector3.zero;
         }
     }
 }

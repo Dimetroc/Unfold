@@ -47,7 +47,7 @@ namespace AnimatedMesh
 
         private void ProcessDirection()
         {
-            _unfoldDirection = new UnfoldDirection(_direction);
+            //_unfoldDirection = new UnfoldDirection(_direction);
             foreach (var triangle in _smartTriangles)
             {
                 triangle.UpdateUnfoldDirection(_unfoldDirection);

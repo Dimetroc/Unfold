@@ -41,10 +41,10 @@ namespace Unfold
 
         public bool UpdateMeshData(float unfoldValue)
         {
-            if(IsSet)return true;
-
-            
-
+            if (IsSet)
+            {
+                return true;
+            }
             if (_hasChildren)
             {
                 UpdateChildren(unfoldValue);
@@ -59,7 +59,10 @@ namespace Unfold
                 }
                 else
                 {
-                    if (unfoldValue < _directionValue) return false;
+                    if (unfoldValue < _directionValue)
+                    {
+                        return false;
+                    }
                     UpdateSelf();
                 }
             }
@@ -78,9 +81,13 @@ namespace Unfold
             }
             else
             {
-                //_directionValue = direction.GetCentroidAnimationValue(_targetVertices.GetCentroid());
-                _directionValue = direction.GetCentroidRadiusAnimationValue(_targetVertices.GetCentroid());
+                _directionValue = direction.GetCentroidAnimationValue(_targetVertices.GetCentroid());
             }
+        }
+
+        public Vector3 GetCentroid()
+        {
+            return _targetVertices.GetCentroid();
         }
 
         public void Clear()
@@ -98,7 +105,6 @@ namespace Unfold
 
         private void SetFirst()
         {
-            //_currentVertices.SetToVector((_targetVertices + new Vector3(0, 10, 0)).GetCentroid());
             _currentVertices.SetToVector((_targetVertices ).GetCentroid());
         }
 
