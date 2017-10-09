@@ -1,23 +1,41 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Unfold
 {
 	public class RadialMeshAnimator : MeshAnimator
 	{
-		public Vector3 _direction;
+		private readonly bool _toCenter;
+		private readonly Vector3 _center;
 
-		public RadialMeshAnimator(Vector3 direction)
+		public RadialMeshAnimator(List<SmartTriangle> smartTriangles, bool toCenter, TrianglesStorage pool)
 		{
-			_direction = direction;
+			SmartTriangles = smartTriangles;
+			_toCenter = toCenter;
+			_center = pool.GetCenter();
+		}
+
+		public override void Start()
+		{
+			foreach (var st in SmartTriangles)
+			{
+				st.Setup(this);
+				//st.PlaceToStartPosition(_offset);
+			}
 		}
 
 		public override float GetAnimationValue(Vector3 centroid)
 		{
 			var projectionMag = centroid.magnitude;
-			Min = 0;
-			if (projectionMag > Max) Max = projectionMag;
+			MinValue = 0;
+			if (projectionMag > MaxValue) MaxValue = projectionMag;
 
 			return projectionMag;
+			if (_toCenter)
+			{
+				return GetAnimationValue(centroid, (_center - centroid).normalized);
+			}
+			return GetAnimationValue(centroid, (centroid - _center).normalized);
 		}
 	}
 }

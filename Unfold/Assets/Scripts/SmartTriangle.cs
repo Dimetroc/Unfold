@@ -2,46 +2,57 @@
 
 namespace Unfold
 {
-	public class Vector3RefWrapper
-	{
-		public Vector3 Vector3 { get; private set; }
-
-		public Vector3RefWrapper(Vector3 vector3)
-		{
-			Vector3 = vector3;
-		}
-	}
-
     public class SmartTriangle
     {
-        private TrianglesStorage _storage;
+        private TrianglesStorage _pool;
         private MeshTriangle _meshTriangle;
 
         private TriangleData _currentTriangle;
         private TriangleData _targetTriangle;
-        private const float DELTA = 0.1f;
-        private const float SPEED = 10.0f;
-        private float _directionValue;
+        
+        private float _canMoveValue;
         private SmartTriangle[] _children;
 
         private bool _hasChildren;
-        private bool _isFirst = true;
-        public bool IsSet { get; private set; }
+	    private bool _isComplete;
 
-        public SmartTriangle(TriangleData triangle, TrianglesStorage storage, float minimumArea)
+	    private const float DELTA = 0.1f;
+	    private const float SPEED = 10.0f;//TODO to setup parameters
+
+		public SmartTriangle(TriangleData triangle, TrianglesStorage pool, float minimumArea)
         {
-            IsSet = false;
             _currentTriangle = _targetTriangle = triangle;
-            _storage = storage;
+            _pool = pool;
 
             _hasChildren = _targetTriangle.GetArea() > minimumArea;
             if (_hasChildren)
             {
-                _children = SubDivider.SubDivideTriangle(triangle, _storage, minimumArea);
+                _children = SubDivider.SubDivideTriangle(triangle, _pool, minimumArea);
             }
         }
 
-        public void Show()
+	    public void PlaceToStartPosition(Vector3 offset)
+	    {
+			_currentTriangle.SetVector((_targetTriangle + offset).GetCentroid());
+	    }
+
+	    public void Setup(MeshAnimator meshAnimator)
+	    {
+		    if (_hasChildren)
+		    {
+			    foreach (var child in _children)
+			    {
+				    child.Setup(meshAnimator);
+			    }
+		    }
+		    else
+		    {
+			    _canMoveValue = meshAnimator.GetAnimationValue(_targetTriangle.GetCentroid());
+		    }
+		}
+
+		#region Temp
+		public void Show()
         {
             if (_hasChildren)
             {
@@ -60,15 +71,16 @@ namespace Unfold
         {
             if (_meshTriangle == null)
             {
-                _meshTriangle = _storage.GetTriangle();
+                _meshTriangle = _pool.GetTriangle();
                 _meshTriangle.UseTriangle(_currentTriangle);
             }
             _meshTriangle.UpdateTriangle(_currentTriangle);
         }
+		#endregion
 
-        public bool UpdateMeshData(float unfoldValue)
+		public bool UpdateMeshData(float unfoldValue)
         {
-            if (IsSet)
+            if (_isComplete)
             {
                 return true;
             }
@@ -78,42 +90,14 @@ namespace Unfold
             }
             else
             {
-	            if (_isFirst)
+				if (unfoldValue < _canMoveValue)
 	            {
-		            SetFirst();
-					_isFirst = false;
+		            return false;
 	            }
-	            else
-	            {
-					if (unfoldValue < _directionValue)
-		            {
-			            return false;
-		            }
-		            UpdateSelf();
-				}
-            }
+	            UpdateSelf();
+			}
 
-            return IsSet;
-        }
-
-	    private void SetFirst()
-	    {
-		    _currentTriangle.SetVector((_targetTriangle + new Vector3(0, 10, 0)).GetCentroid());
-	    }
-
-        public void SetAnimator(MeshAnimator meshAnimator)
-        {
-            if (_hasChildren)
-            {
-                foreach (var child in _children)
-                {
-                    child.SetAnimator(meshAnimator);
-                }
-            }
-            else
-            {
-                _directionValue = meshAnimator.GetAnimationValue(_targetTriangle.GetCentroid());
-            }
+            return _isComplete;
         }
 
         private void Clear()
@@ -124,8 +108,8 @@ namespace Unfold
             }
 
             _meshTriangle.ClearTriangle();
-            _storage.ReturnTriangle(_meshTriangle);
-            _storage = null;
+            _pool.ReturnTriangle(_meshTriangle);
+            _pool = null;
             _meshTriangle = null;
         }
 
@@ -133,13 +117,13 @@ namespace Unfold
         {
             if (_meshTriangle == null)
             {
-                _meshTriangle = _storage.GetTriangle();
+                _meshTriangle = _pool.GetTriangle();
                 _meshTriangle.UseTriangle(_currentTriangle);
             }
 
             _currentTriangle.Lerp(_targetTriangle, Time.deltaTime * SPEED);
-            IsSet = _currentTriangle.TheSame(_targetTriangle, DELTA);
-            if (IsSet)
+	        _isComplete = _currentTriangle.TheSame(_targetTriangle, DELTA);
+            if (_isComplete)
             {
                 _currentTriangle = _targetTriangle;
             }
@@ -149,14 +133,14 @@ namespace Unfold
         
         private void UpdateChildren(float unfoldValue)
         {
-            IsSet = true;
+	        _isComplete = true;
 
             for (int i = 0; i < _children.Length; i++)
             {
-                IsSet = _children[i].UpdateMeshData(unfoldValue) && IsSet;
+	            _isComplete = _children[i].UpdateMeshData(unfoldValue) && _isComplete;
             }
 
-            if (IsSet)
+            if (_isComplete)
             {
 				Combine();
 			}
@@ -166,11 +150,11 @@ namespace Unfold
 	    {
 		    ClearChildren();
 
-		    _meshTriangle = _storage.GetTriangle();
+		    _meshTriangle = _pool.GetTriangle();
 		    _meshTriangle.UseTriangle(_currentTriangle);
 		    _meshTriangle.UpdateTriangle(_currentTriangle);
 
-		    IsSet = true;
+		    _isComplete = true;
 	    }
 
 		private void ClearChildren()

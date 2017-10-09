@@ -1,38 +1,34 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Unfold
 {
 	public class DirectMeshAnimator : MeshAnimator
 	{
-		public Vector3 _direction;
-		private TrianglesStorage _storage;
+		private readonly Vector3 _direction;
+		private readonly bool _inverse;
+		private readonly Vector3 _offset;
 
-		public DirectMeshAnimator(Vector3 direction)
+		public DirectMeshAnimator(List<SmartTriangle> smartTriangles, Vector3 direction, Vector3 offset, bool inverse)
 		{
+			SmartTriangles = smartTriangles;
 			_direction = direction;
+			_offset = offset;
+			_inverse = inverse;
 		}
 
 		public override float GetAnimationValue(Vector3 centroid)
 		{
-			var dir = _direction.normalized;
-			var projection = Vector3.Project(centroid, dir);
-			var projectionMag = projection.magnitude;
-			if (Vector3.Dot(projection, dir) < 0)
+			return GetAnimationValue(centroid, _direction.normalized);
+		}
+
+		public override void Start()
+		{
+			foreach (var st in SmartTriangles)
 			{
-				projectionMag *= -1;
-				if (projectionMag < Min)
-				{
-					Min = projectionMag;
-				}
+				st.Setup(this);
+				//st.PlaceToStartPosition(_offset);
 			}
-			else
-			{
-				if (projectionMag > Max)
-				{
-					Max = projectionMag;
-				}
-			}
-			return projectionMag;
 		}
 	}
 }

@@ -52,9 +52,9 @@ namespace Unfold
 			switch (_animationType)
 			{
 				case AnimationType.Direct:
-					return new DirectMeshAnimator(_direction);
+					return new DirectMeshAnimator(_smartTriangles, _direction, new Vector3(0, 10, 0), false);
 				case AnimationType.Radial:
-					return new RadialMeshAnimator(_direction);
+					return new RadialMeshAnimator(_smartTriangles, true, _trianglesStorage);
 			}
 		    return null;
 	    }
@@ -70,9 +70,9 @@ namespace Unfold
 		    _meshAnimator = CreateAnimator();
 			foreach (var triangle in _smartTriangles)
 		    {
-			    triangle.SetAnimator(_meshAnimator);
+			    triangle.Setup(_meshAnimator);
 		    }
-		    _animationValue = _meshAnimator.Min;
+		    _animationValue = _meshAnimator.MinValue;
 		}
 
         private void Update()
