@@ -8,13 +8,15 @@ namespace Unfold
 		private readonly Vector3 _direction;
 		private readonly bool _inverse;
 		private readonly Vector3 _offset;
+	    private readonly MeshFilter _meshFilter;
 
-		public DirectMeshAnimator(List<SmartTriangle> smartTriangles, Vector3 direction, Vector3 offset, bool inverse)
+		public DirectMeshAnimator(List<SmartTriangle> smartTriangles, Vector3 direction, Vector3 offset, bool inverse, MeshFilter meshFilter)
 		{
 			SmartTriangles = smartTriangles;
 			_direction = direction;
 			_offset = offset;
 			_inverse = inverse;
+		    _meshFilter = meshFilter;
 		}
 
 		public override float GetAnimationValue(Vector3 centroid)
@@ -24,10 +26,22 @@ namespace Unfold
 
 		public override void Start()
 		{
+		    if (!_inverse)
+		    {
+		        _meshFilter.mesh.Clear();
+		    }
 			foreach (var st in SmartTriangles)
 			{
-				st.Setup(this);
-				//st.PlaceToStartPosition(_offset);
+                st.Setup(this);
+			    if (_inverse)
+			    {
+                    st.Show();
+                    st.ChangeTargetPosition(_offset);
+			    }
+			    else
+			    {
+                    st.ChangeCurrentPosition(_offset);
+			    }
 			}
 		}
 	}

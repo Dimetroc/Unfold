@@ -7,30 +7,43 @@ namespace Unfold
 	{
 		private readonly bool _toCenter;
 		private readonly Vector3 _center;
+        private readonly bool _inverse;
+        private readonly Vector3 _offset;
+        private readonly MeshFilter _meshFilter;
 
-		public RadialMeshAnimator(List<SmartTriangle> smartTriangles, bool toCenter, TrianglesStorage pool)
+        public RadialMeshAnimator(List<SmartTriangle> smartTriangles, bool toCenter, Vector3 center, bool inverse, Vector3 offset, MeshFilter meshFilter)
 		{
 			SmartTriangles = smartTriangles;
 			_toCenter = toCenter;
-			_center = pool.GetCenter();
+            _center = center;
+            _inverse = inverse;
+            _offset = offset;
+            _meshFilter = meshFilter;
 		}
 
 		public override void Start()
 		{
-			foreach (var st in SmartTriangles)
-			{
-				st.Setup(this);
-				//st.PlaceToStartPosition(_offset);
-			}
+            if (!_inverse)
+            {
+                _meshFilter.mesh.Clear();
+            }
+            foreach (var st in SmartTriangles)
+            {
+                st.Setup(this);
+                if (_inverse)
+                {
+                    st.Show();
+                    //st.ChangeTargetPosition(_offset);
+                }
+                else
+                {
+                    //st.ChangeCurrentPosition(_offset);
+                }
+            }
 		}
 
 		public override float GetAnimationValue(Vector3 centroid)
 		{
-			var projectionMag = centroid.magnitude;
-			MinValue = 0;
-			if (projectionMag > MaxValue) MaxValue = projectionMag;
-
-			return projectionMag;
 			if (_toCenter)
 			{
 				return GetAnimationValue(centroid, (_center - centroid).normalized);

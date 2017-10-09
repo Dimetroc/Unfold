@@ -19,19 +19,6 @@ namespace Unfold
 
 		public abstract void Start();
 
-		public virtual bool Update(float animationValue)
-		{
-			var allCompleted = true;
-			foreach (var smartTriangle in SmartTriangles)
-			{
-				if (!smartTriangle.UpdateMeshData(animationValue))
-				{
-					allCompleted = false;
-				}
-			}
-			return allCompleted;
-		}
-
 		public abstract float GetAnimationValue(Vector3 centroid);
 
 		protected float GetAnimationValue(Vector3 centroid, Vector3 direction)
