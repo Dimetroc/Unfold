@@ -1,49 +1,37 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using AnimatedMesh.AnimationModels;
+using System.Linq;
+using System.Text;
+using Unfold;
 using UnityEngine;
 using UnityEngine.Profiling;
 
-namespace Unfold
+namespace AnimatedMesh.AnimationModels
 {
-    [RequireComponent(typeof(MeshFilter))]
-    public class Unfolder:MonoBehaviour
+    public class RadialController
     {
         private MeshFilter _meshFilter;
         private Mesh _mesh;
-
+        private TrianglesPool _trianglesPool;
+        private UnfoldDirection _unfoldDirection;
+        private List<RadialModel> _radialModelBases;
         private MeshData _originalMeshData;
         private MeshData _newMeshData;
 
-        private TrianglesPool _trianglesPool;
-
-        private UnfoldDirection _unfoldDirection;
-
-        private List<SmartTriangle> _smartTriangles;
-
         private bool _allAreSet = false;
         private float _directionValue = 0;
+        private float _unfoldSpeed = 5.0f;
 
-        private RadialController _radialController;
-
-        [SerializeField] private Vector3 _direction;
-        [SerializeField] private float _minimalArea = 1;
-        [SerializeField] private float _unfoldSpeed = 10.0f;
-         
-        private void Awake()
+        public RadialController(MeshFilter meshFilter)
         {
-
-
-            _meshFilter = GetComponent<MeshFilter>();
-
-            _radialController = new RadialController(_meshFilter);
-            return;
+            _meshFilter = meshFilter;
             _mesh = _meshFilter.mesh;
+
             _originalMeshData = new MeshData(_mesh);
             _newMeshData = new MeshData();
             _trianglesPool = new TrianglesPool(_newMeshData);
 
-            _meshFilter.mesh.Clear();
+            _mesh.Clear();
 
             GenerateTriangles();
 
@@ -52,10 +40,11 @@ namespace Unfold
             _directionValue = _unfoldDirection.Min;
         }
 
+
         private void ProcessDirection()
         {
-            _unfoldDirection = new UnfoldDirection(_direction);
-            foreach (var triangle in _smartTriangles)
+            _unfoldDirection = new UnfoldDirection(Vector3.up);
+            foreach (var triangle in _radialModelBases)
             {
                 triangle.UpdateUnfoldDirection(_unfoldDirection);
             }
@@ -63,37 +52,33 @@ namespace Unfold
 
         private void GenerateTriangles()
         {
-            _smartTriangles = new List<SmartTriangle>();
+            _radialModelBases = new List<RadialModel>();
 
-            for (int i = 0; i < _originalMeshData.Triangles.Count; i+= 3)
+            for (int i = 0; i < _originalMeshData.Triangles.Count; i += 3)
             {
-                _smartTriangles.Add(new SmartTriangle(new TriangleData(_originalMeshData, i), _trianglesPool, _minimalArea));
+                _radialModelBases.Add(new RadialModel(new TriangleData(_originalMeshData, i), _trianglesPool, 0.2f));
             }
         }
 
 
-        private void Update()
+        public void UpdateMeshTriangles()
         {
-            _radialController.UpdateMeshTriangles();
-            return;
-            if(!_allAreSet)
+            if (!_allAreSet)
             {
                 _directionValue += Time.deltaTime * _unfoldSpeed;
-                Profiler.BeginSample("UpdateTriangles");
                 _allAreSet = UpdateTriangles(_directionValue);
-                Profiler.EndSample();
-                Profiler.BeginSample("UpdateMesh");
                 UpdateMesh();
-                Profiler.EndSample();
+
             }
         }
 
         private bool UpdateTriangles(float directionValue)
         {
             var allAreSet = true;
-            foreach (var st in _smartTriangles)
+            foreach (var st in _radialModelBases)
             {
-                if (!st.UpdateMeshData(directionValue)) allAreSet = false;
+                st.UpdateMeshData(directionValue);
+                if(!st.IsSet)allAreSet = false;
             }
 
             return allAreSet;

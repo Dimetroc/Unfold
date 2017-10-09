@@ -1,9 +1,27 @@
-﻿using UnityEngine;
+﻿using System;
 
 namespace Unfold
 {
     public static class SubDivider
     {
+        public static T[] SubDivideTriangle<T>(TriangleData triangle, Func<TriangleData, T> getChild)
+        {
+            var tds = new[] { new TriangleData(), new TriangleData(), new TriangleData(), new TriangleData() };
+
+            SubDivideTriangles(ref tds);
+            SubDivideVertices(triangle, ref tds);
+            SubDivideNormals(triangle, ref tds);
+            SubDivideUvs(triangle, ref tds);
+
+            var triangles = new T[4];
+
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                triangles[i] = getChild(tds[i]);
+            }
+
+            return triangles;
+        }
 
         public static SmartTriangle[] SubDivideTriangle(TriangleData triangle, TrianglesPool pool, float targetArea)
         {
@@ -117,5 +135,10 @@ namespace Unfold
             var sqrDelta = delta * delta;
             return (a.V0 - b.V0).sqrMagnitude < sqrDelta && (a.V1 - b.V1).sqrMagnitude < sqrDelta && (a.V2 - b.V2).sqrMagnitude < sqrDelta;
         }
+
+
+
+
+
     }
 }
