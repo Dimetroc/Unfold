@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using Unfold;
 using UnityEngine;
-using UnityEngine.Profiling;
+
 
 namespace AnimatedMesh.AnimationModels
 {
@@ -63,21 +60,18 @@ namespace AnimatedMesh.AnimationModels
 
         public void UpdateMeshTriangles()
         {
-            if (!_allAreSet)
-            {
-                _directionValue += Time.deltaTime * _unfoldSpeed;
-                _allAreSet = UpdateTriangles(_directionValue);
-                UpdateMesh();
-
-            }
+            if (_allAreSet) return;
+            _directionValue += Time.deltaTime * _unfoldSpeed;
+            _allAreSet = UpdateTriangles();
+            UpdateMesh();
         }
 
-        private bool UpdateTriangles(float directionValue)
+        private bool UpdateTriangles()
         {
             var allAreSet = true;
             foreach (var st in _radialModelBases)
             {
-                st.UpdateMeshData(directionValue);
+                st.UpdateModel(_directionValue);
                 if(!st.IsSet)allAreSet = false;
             }
 

@@ -11,7 +11,6 @@ namespace AnimatedMesh.AnimationModels
         protected MeshTriangle _meshTriangle;
 
         protected TriangleData _triangle;
-        protected TriangleVertices _currentVertices;
         protected TriangleVertices _targetVertices;
         protected T[] _children;
         protected bool _hasChildren = false;
@@ -48,16 +47,55 @@ namespace AnimatedMesh.AnimationModels
             _hasChildren = false;
         }
 
-        protected void Combine()
+        protected void UpdateMeshData()
         {
-            ClearChildren();
+            if (IsSet) return;
 
-            _meshTriangle = _pool.GetTriangle();
-            _meshTriangle.UseTriangle(_triangle);
-            _meshTriangle.UpdateVertices(_currentVertices);
+            if (_hasChildren)
+            {
+                UpdateChildren();
+            }
+            else
+            { 
+                UpdateSelf();
+            }
+        }
 
+        private void UpdateChildren()
+        {
             IsSet = true;
 
+            for (int i = 0; i < _children.Length; i++)
+            {
+                UpdateChild(_children[i]);
+                IsSet = _children[i].IsSet && IsSet;
+            }
+
+            if (IsSet)
+            {
+                Combine();
+            }
+        }
+
+        protected abstract void UpdateChild(T child);
+
+        protected abstract void UpdateSelf();
+
+        private void Combine()
+        {
+            ClearChildren();
+            SetVertices(_targetVertices);
+        }
+
+        protected void SetVertices(TriangleVertices vertices)
+        {
+            if (_meshTriangle == null)
+            {
+                _meshTriangle = _pool.GetTriangle();
+                _meshTriangle.UseTriangle(_triangle);
+            }
+
+            _meshTriangle.UpdateVertices(vertices);
         }
     }
 }

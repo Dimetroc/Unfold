@@ -8,13 +8,12 @@ namespace AnimatedMesh.AnimationModels
 
         private const float DELTA = 0.1f;
         private const float SPEED = 10.0f;
-        private float _rad = 0.0f;
+        private float _radius = 0.0f;
         private float _unfoldRadius = 0.0f;
-
-
+        private TriangleVertices _currentVertices;
         private bool _isFirst = true;
 
-        private float _minArea;
+        private readonly float _minArea;
 
         public RadialModel(TriangleData triangle, TrianglesPool pool, float minimumArea)
         {
@@ -41,41 +40,10 @@ namespace AnimatedMesh.AnimationModels
             return new RadialModel(triangle, _pool, _minArea);
         }
 
-       
-
-        private float _directionValue = 0.0f;
-
-
-
-
-
-
-        public bool UpdateMeshData(float unfoldValue)
+        public void UpdateModel(float radius)
         {
-            if (IsSet) return true;
-
-
-
-            if (_hasChildren)
-            {
-                UpdateChildren(unfoldValue);
-            }
-            else
-            {
-
-                if (_isFirst)
-                {
-                    SetFirst();
-                    _isFirst = false;
-                }
-                else
-                {
-                    if (unfoldValue < _directionValue) return false;
-                    UpdateSelf();
-                }
-            }
-
-            return IsSet;
+            _unfoldRadius = radius;
+            UpdateMeshData();
         }
 
         public void UpdateUnfoldDirection(UnfoldDirection direction)
@@ -89,81 +57,33 @@ namespace AnimatedMesh.AnimationModels
             }
             else
             {
-                //_directionValue = direction.GetCentroidAnimationValue(_targetVertices.GetCentroid());
-                _directionValue = direction.GetCentroidRadiusAnimationValue(_targetVertices.GetCentroid());
+                _radius = direction.GetCentroidRadiusAnimationValue(_targetVertices.GetCentroid());
             }
         }
 
-        public void Clear()
+        protected override void UpdateChild(RadialModel child)
         {
-            if (_children != null && _children.Length != 0)
+            child.UpdateModel(_unfoldRadius);
+        }
+
+        protected override void UpdateSelf()
+        {
+            if (_isFirst)
             {
-                ClearChildren();
+                _currentVertices.SetToVector((_targetVertices).GetCentroid());
+                _isFirst = false;
             }
-
-            _meshTriangle.ClearTriangle();
-            _pool.ReturnTriangle(_meshTriangle);
-            _pool = null;
-            _meshTriangle = null;
-        }
-
-        private void SetFirst()
-        {
-            //_currentVertices.SetToVector((_targetVertices + new Vector3(0, 10, 0)).GetCentroid());
-            _currentVertices.SetToVector((_targetVertices).GetCentroid());
-        }
-
-        private void UpdateSelf()
-        {
-
-            if (_meshTriangle == null)
+            else
             {
-                _meshTriangle = _pool.GetTriangle();
-                _meshTriangle.UseTriangle(_triangle);
+
+                if (_unfoldRadius < _radius) return;
+
+                _currentVertices.Lerp(_targetVertices, Time.deltaTime * SPEED);
+                IsSet = _currentVertices.TheSame(_targetVertices, DELTA);
+                if (IsSet) _currentVertices = _targetVertices;
             }
-
-            _currentVertices.Lerp(_targetVertices, Time.deltaTime * SPEED);
-            IsSet = _currentVertices.TheSame(_targetVertices, DELTA);
-            if (IsSet) _currentVertices = _targetVertices;
-
-            _meshTriangle.UpdateVertices(_currentVertices);
+            SetVertices(_currentVertices);
         }
 
-        private void UpdateChildren(float unfoldValue)
-        {
-            IsSet = true;
-
-            for (int i = 0; i < _children.Length; i++)
-            {
-                IsSet = _children[i].UpdateMeshData(unfoldValue) && IsSet;
-            }
-
-            if (IsSet)
-            {
-                Combine();
-            }
-        }
-
-        private void ClearChildren()
-        {
-            for (int i = 0; i < _children.Length; i++)
-            {
-                _children[i].Clear();
-            }
-            _children = null;
-            _hasChildren = false;
-        }
-
-        private void Combine()
-        {
-            ClearChildren();
-
-            _meshTriangle = _pool.GetTriangle();
-            _meshTriangle.UseTriangle(_triangle);
-            _meshTriangle.UpdateVertices(_currentVertices);
-
-            IsSet = true;
-
-        }
     }
 }
