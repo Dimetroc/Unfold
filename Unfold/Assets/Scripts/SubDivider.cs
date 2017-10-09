@@ -5,7 +5,7 @@ namespace Unfold
     public static class SubDivider
     {
 
-        public static SmartTriangle[] SubDivideTriangle(TriangleData triangle, TrianglesPool pool, float targetArea)
+        public static SmartTriangle[] SubDivideTriangle(TriangleData triangle, TrianglesStorage storage, float targetArea)
         {
             var tds = new TriangleData[]{new TriangleData(), new TriangleData(), new TriangleData(), new TriangleData()  };
 
@@ -18,7 +18,7 @@ namespace Unfold
 
             for (int i = 0; i < sts.Length; i++)
             {
-                sts[i] = new SmartTriangle(tds[i], pool, targetArea);
+                sts[i] = new SmartTriangle(tds[i], storage, targetArea);
             }
 
             return sts;
@@ -112,7 +112,7 @@ namespace Unfold
             target[3].Uv2 = uvb;
         }
 
-        public static bool TheSame(this TriangleVertices a, TriangleVertices b, float delta)
+        public static bool TheSame(this TriangleData a, TriangleData b, float delta)
         {
             var sqrDelta = delta * delta;
             return (a.V0 - b.V0).sqrMagnitude < sqrDelta && (a.V1 - b.V1).sqrMagnitude < sqrDelta && (a.V2 - b.V2).sqrMagnitude < sqrDelta;

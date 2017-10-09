@@ -1,12 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
 
 namespace Unfold
 {
-    
-    [RequireComponent(typeof(MeshFilter))]
+	[RequireComponent(typeof(MeshFilter))]
     public class Unfolder:MonoBehaviour
     {
         private MeshFilter _meshFilter;
@@ -15,18 +13,21 @@ namespace Unfold
         private MeshData _originalMeshData;
         private MeshData _newMeshData;
 
-        private TrianglesPool _trianglesPool;
+        private TrianglesStorage _trianglesStorage;
 
-        private UnfoldDirection _unfoldDirection;
+        private MeshAnimator _meshAnimator;
 
         private List<SmartTriangle> _smartTriangles;
 
         private bool _allAreSet;
-        private float _directionValue;
+        private float _animationValue;
 
         #region Settings
-        [SerializeField]
-        private UnfoldDirections _direction;
+
+	    [SerializeField]
+		private AnimationType _animationType;
+		[SerializeField]
+        private Vector3 _direction;
         [SerializeField] 
         private float _minimalArea = 1;
         [SerializeField] 
@@ -41,62 +42,46 @@ namespace Unfold
             _mesh = _meshFilter.mesh;
             _originalMeshData = new MeshData(_mesh);
             _newMeshData = new MeshData();
-            _trianglesPool = new TrianglesPool(_newMeshData);
-
+            _trianglesStorage = new TrianglesStorage(_newMeshData);
             _meshFilter.mesh.Clear();
-
-            GenerateTriangles();
-            ProcessDirection();
+            Prepare();
         }
 
-        private void ProcessDirection()
-        {
-            var center = GetCenter();
-            _unfoldDirection = new UnfoldDirection(_direction, center);
-            foreach (var triangle in _smartTriangles)
-            {
-                triangle.UpdateUnfoldDirection(_unfoldDirection);
-                if (_inverse)
-                {
-                    triangle.SetTarget(center);
-                    triangle.Show();
-                }
-            }
-            _directionValue = _unfoldDirection.Min;
-        }
+	    private MeshAnimator CreateAnimator()
+	    {
+			switch (_animationType)
+			{
+				case AnimationType.Direct:
+					return new DirectMeshAnimator(_direction);
+				case AnimationType.Radial:
+					return new RadialMeshAnimator(_direction);
+			}
+		    return null;
+	    }
 
-        private Vector3 GetCenter()
-        {
-            var xSum = 0f;
-            var ySum = 0f;
-            var zSum = 0f;
-            foreach (var triangle in _smartTriangles)
-            {
-                xSum += triangle.GetCentroid().x;
-                ySum += triangle.GetCentroid().y;
-                zSum += triangle.GetCentroid().z;
-            }
-            return new Vector3(xSum / _smartTriangles.Count, ySum / _smartTriangles.Count, zSum / _smartTriangles.Count);
-        }
+	    private void Prepare()
+	    {
+		    _smartTriangles = new List<SmartTriangle>();
 
-        private void GenerateTriangles()
-        {
-            _smartTriangles = new List<SmartTriangle>();
-
-            for (int i = 0; i < _originalMeshData.Triangles.Count; i += 3)
-            {
-                _smartTriangles.Add(new SmartTriangle(new TriangleData(_originalMeshData, i), _trianglesPool, _minimalArea));
-            }
-        }
-
+		    for (int i = 0; i < _originalMeshData.Triangles.Count; i += 3)
+		    {
+			    _smartTriangles.Add(new SmartTriangle(new TriangleData(_originalMeshData, i), _trianglesStorage, _minimalArea));
+		    }
+		    _meshAnimator = CreateAnimator();
+			foreach (var triangle in _smartTriangles)
+		    {
+			    triangle.SetAnimator(_meshAnimator);
+		    }
+		    _animationValue = _meshAnimator.Min;
+		}
 
         private void Update()
         {
             if(!_allAreSet)
             {
-                _directionValue += Time.deltaTime * _unfoldSpeed;
+                _animationValue += Time.deltaTime * _unfoldSpeed;
                 Profiler.BeginSample("UpdateTriangles");
-                _allAreSet = UpdateTriangles(_directionValue);
+                _allAreSet = UpdateTriangles(_animationValue);
                 Profiler.EndSample();
                 Profiler.BeginSample("UpdateMesh");
                 UpdateMesh();

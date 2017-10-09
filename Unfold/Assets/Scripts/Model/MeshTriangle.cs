@@ -1,4 +1,6 @@
-﻿namespace Unfold
+﻿using UnityEngine;
+
+namespace Unfold
 {
     public class MeshTriangle
     {
@@ -18,7 +20,7 @@
             _targetMeshData.UpdateTriangleData(_triangleData);
         }
 
-        public void UpdateVertices(TriangleVertices vertices)
+        public void UpdateTriangle(TriangleData vertices)
         {
             _triangleData.UpdateVertices(vertices);
             _targetMeshData.UpdateTriangleVertices(_triangleData);
@@ -29,5 +31,10 @@
             _triangleData.ClearData();
             _targetMeshData.UpdateTriangleData(_triangleData);
         }
+
+	    public Vector3 GetCentroid()
+	    {
+		    return _triangleData.GetCentroid();
+	    }
     }
 }
