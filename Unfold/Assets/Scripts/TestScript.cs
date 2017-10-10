@@ -10,8 +10,16 @@ public class TestScript : MonoBehaviour
 	[SerializeField] private Button _radialButton;
 	[SerializeField] private Button _randomButton;
 	[SerializeField] private Toggle _unfoldToggle;
+	[SerializeField] private Button _playButton;
 
 	[SerializeField] private AnimatedMesh _animatedMesh;
+
+	private class PlayData
+	{
+		public AnimationType Type;
+		public bool Unfold;
+	}
+	private Queue<PlayData> _playData = new Queue<PlayData>();
 
 	private void Awake()
 	{
@@ -19,25 +27,53 @@ public class TestScript : MonoBehaviour
 		_radialButton.onClick.AddListener(OnRadialButtonClicked);
 		_randomButton.onClick.AddListener(OnRandomButtonClicked);
 		_animatedMesh.AnimationFinished += OnAnimationFinished;
+		_playButton.onClick.AddListener(OnPlayButtonClicked);
 	}
 
 	private void OnDirectButtonClicked()
 	{
-		_animatedMesh.StartAnimation(AnimationType.Direct, _unfoldToggle.isOn);
+		_playData.Enqueue(new PlayData()
+		{
+			Type = AnimationType.Direct,
+			Unfold = _unfoldToggle.isOn
+		});
 	}
 
 	private void OnRadialButtonClicked()
 	{
-		_animatedMesh.StartAnimation(AnimationType.Radial, _unfoldToggle.isOn);
+		_playData.Enqueue(new PlayData()
+		{
+			Type = AnimationType.Radial,
+			Unfold = _unfoldToggle.isOn
+		});
 	}
 
 	private void OnRandomButtonClicked()
 	{
-		_animatedMesh.StartAnimation(AnimationType.Random, _unfoldToggle.isOn);
+		_playData.Enqueue(new PlayData()
+		{
+			Type = AnimationType.Random,
+			Unfold = _unfoldToggle.isOn
+		});
+	}
+
+	private void OnPlayButtonClicked()
+	{
+		DequeueAndPlay();
 	}
 
 	private void OnAnimationFinished()
 	{
 		Debug.Log("Finished");
+		DequeueAndPlay();
+	}
+
+	private void DequeueAndPlay()
+	{
+		if (_playData.Count > 0)
+		{
+			var playData = _playData.Dequeue();
+			_animatedMesh.StartAnimation(playData.Type, playData.Unfold);
+		}
 	}
 }
