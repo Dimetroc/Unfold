@@ -61,6 +61,9 @@ namespace Unfold
                 case AnimationType.Radial:
                     _meshAnimator = new RadialMeshAnimator(_smartTriangles, ToCenter, Unfold, Offset, _meshFilter);
                     break;
+				case AnimationType.Random:
+					_meshAnimator = new RandomMeshAnimator(_smartTriangles, Offset, Unfold, _meshFilter);
+					break;
             }
             StartCoroutine(AnimationRoutine());
         }
@@ -83,7 +86,9 @@ namespace Unfold
                 Profiler.EndSample();
                 yield return null;
             }
-        }
+	        _meshAnimator.End();
+
+		}
 
         private bool UpdateTriangles(float directionValue)
         {

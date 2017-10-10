@@ -7,7 +7,8 @@ namespace Unfold
 	public enum AnimationType
 	{
 		Direct,
-		Radial
+		Radial,
+		Random
 	}
 
 	public abstract class MeshAnimator
@@ -18,6 +19,8 @@ namespace Unfold
 		public float MinValue { get; protected set; }
 
 		public abstract void Start();
+
+		public abstract void End();
 
 		public abstract float GetAnimationValue(Vector3 centroid);
 

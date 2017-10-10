@@ -32,7 +32,8 @@ namespace Unfold
 		    }
 			foreach (var st in SmartTriangles)
 			{
-                st.Setup(this);
+				st.Optimize = !_unfold;
+				st.Setup(this);
 			    if (_unfold)
 			    {
                     st.Show();
@@ -42,6 +43,14 @@ namespace Unfold
 			    {
                     st.ChangeCurrentPosition(_offset);
 			    }
+			}
+		}
+
+		public override void End()
+		{
+			if (_unfold)
+			{
+				_meshFilter.mesh.Clear();
 			}
 		}
 	}

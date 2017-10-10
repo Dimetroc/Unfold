@@ -15,6 +15,8 @@ namespace Unfold
         private bool _hasChildren;
 	    private bool _isComplete;
 
+	    public bool Optimize;
+
 	    private const float DELTA = 0.1f;
 	    private const float SPEED = 10.0f;//TODO to setup parameters
 
@@ -116,8 +118,8 @@ namespace Unfold
                 }
                 if (_isComplete)
                 {
-                    Combine();
-                }
+					Combine();
+				}
             }
             else
             {
@@ -151,6 +153,10 @@ namespace Unfold
 
 	    private void Combine()
 	    {
+		    if (!Optimize)
+		    {
+			    return;
+		    }
             if (_children == null || _children.Length == 0)
             {
                 return;
