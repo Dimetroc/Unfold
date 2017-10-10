@@ -12,16 +12,17 @@ namespace AnimatedMesh.AnimationModels
         private float _unfoldRadius = 0.0f;
         private TriangleVertices _currentVertices;
         private bool _isFirst = true;
-
+        private RadialController.RadialType _radialType;
         private readonly float _minArea;
 
-        public RadialModel(TriangleData triangle, TrianglesPool pool, float minimumArea)
+        public RadialModel(TriangleData triangle, TrianglesPool pool, RadialController.RadialType type, float minimumArea)
         {
             IsSet = false;
             _triangle = triangle;
             _minArea = minimumArea;
             _currentVertices = _targetVertices = new TriangleVertices(_triangle);
             _pool = pool;
+            _radialType = type;
 
             _hasChildren = _targetVertices.GetArea() > minimumArea;
             if (_hasChildren)
@@ -37,7 +38,7 @@ namespace AnimatedMesh.AnimationModels
 
         protected override RadialModel GetChild(TriangleData triangle)
         {
-            return new RadialModel(triangle, _pool, _minArea);
+            return new RadialModel(triangle, _pool, _radialType, _minArea);
         }
 
         public void UpdateModel(float radius)
@@ -75,8 +76,15 @@ namespace AnimatedMesh.AnimationModels
             }
             else
             {
-
-                if (_unfoldRadius < _radius) return;
+                if (_radialType == RadialController.RadialType.Inward)
+                {
+                    if (_unfoldRadius < _radius) return;
+                }
+                else
+                {
+                    if (_unfoldRadius > _radius) return;
+                }
+                
 
                 _currentVertices.Lerp(_targetVertices, Time.deltaTime * SPEED);
                 IsSet = _currentVertices.TheSame(_targetVertices, DELTA);
@@ -84,6 +92,5 @@ namespace AnimatedMesh.AnimationModels
             }
             SetVertices(_currentVertices);
         }
-
     }
 }

@@ -1,40 +1,31 @@
-﻿using System.Collections.Generic;
-using Unfold;
+﻿using Unfold;
 using UnityEngine;
 
 
 namespace AnimatedMesh.AnimationModels
 {
-    public class RadialController
+    public class RadialController: AnimatedControllerBase<RadialModel>
     {
-        private MeshFilter _meshFilter;
-        private Mesh _mesh;
-        private TrianglesPool _trianglesPool;
-        private UnfoldDirection _unfoldDirection;
-        private List<RadialModel> _radialModelBases;
-        private MeshData _originalMeshData;
-        private MeshData _newMeshData;
+        public enum RadialType
+        {
+            Inward,
+            Outward
+        }
 
+        private UnfoldDirection _unfoldDirection;
         private bool _allAreSet = false;
         private float _directionValue = 0;
         private float _unfoldSpeed = 5.0f;
 
-        public RadialController(MeshFilter meshFilter)
+        private RadialType _radialType;
+
+
+        public RadialController(MeshFilter meshFilter, RadialType type) : base(meshFilter)
         {
-            _meshFilter = meshFilter;
-            _mesh = _meshFilter.mesh;
-
-            _originalMeshData = new MeshData(_mesh);
-            _newMeshData = new MeshData();
-            _trianglesPool = new TrianglesPool(_newMeshData);
-
-            _mesh.Clear();
-
+            _radialType = type;
             GenerateTriangles();
-
             ProcessDirection();
-
-            _directionValue = _unfoldDirection.Min;
+            _directionValue = _radialType == RadialType.Inward? _unfoldDirection.Min:_unfoldDirection.Max;
         }
 
 
@@ -47,23 +38,19 @@ namespace AnimatedMesh.AnimationModels
             }
         }
 
-        private void GenerateTriangles()
+        protected override RadialModel GetModel(int index)
         {
-            _radialModelBases = new List<RadialModel>();
-
-            for (int i = 0; i < _originalMeshData.Triangles.Count; i += 3)
-            {
-                _radialModelBases.Add(new RadialModel(new TriangleData(_originalMeshData, i), _trianglesPool, 0.2f));
-            }
+            return new RadialModel(new TriangleData(_originalMeshData, index), _trianglesPool, _radialType, 0.5f);
         }
 
 
-        public void UpdateMeshTriangles()
+        public override void UpdateMeshTriangles()
         {
             if (_allAreSet) return;
-            _directionValue += Time.deltaTime * _unfoldSpeed;
+            _directionValue += (_radialType == RadialType.Outward? -1:1) * Time.deltaTime * _unfoldSpeed;
             _allAreSet = UpdateTriangles();
-            UpdateMesh();
+            UpdateMeshWithNewMeshData();
+            if(_allAreSet) SetOriginalMeshData();
         }
 
         private bool UpdateTriangles()
@@ -76,14 +63,6 @@ namespace AnimatedMesh.AnimationModels
             }
 
             return allAreSet;
-        }
-
-        private void UpdateMesh()
-        {
-            _meshFilter.mesh.SetVertices(_newMeshData.Vertices);
-            _meshFilter.mesh.SetNormals(_newMeshData.Normals);
-            _meshFilter.mesh.SetUVs(0, _newMeshData.Uvs);
-            _meshFilter.mesh.SetTriangles(_newMeshData.Triangles, 0);
         }
     }
 }

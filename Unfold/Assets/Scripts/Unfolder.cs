@@ -36,7 +36,7 @@ namespace Unfold
 
             _meshFilter = GetComponent<MeshFilter>();
 
-            _radialController = new RadialController(_meshFilter);
+            _radialController = new RadialController(_meshFilter, RadialController.RadialType.Outward);
             return;
             _mesh = _meshFilter.mesh;
             _originalMeshData = new MeshData(_mesh);

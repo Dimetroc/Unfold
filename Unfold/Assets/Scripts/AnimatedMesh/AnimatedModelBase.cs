@@ -1,5 +1,4 @@
 ﻿using Unfold;
-using UnityEngine;
 
 namespace AnimatedMesh.AnimationModels
 {
