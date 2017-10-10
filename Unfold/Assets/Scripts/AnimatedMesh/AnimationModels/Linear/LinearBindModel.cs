@@ -3,16 +3,15 @@ using UnityEngine;
 
 namespace AnimatedMesh.AnimationModels
 {
-    public class RadialBindModel:AnimatedModelBase<RadialBindModel>
+    public class LinearBindModel : AnimatedModelBase<LinearBindModel>
     {
-        private float _radius = 0.0f;
+        private float _value = 0.0f;
         private TriangleVertices _currentVertices;
         private TriangleVertices _targetVertices;
+        private readonly LinearController _controller;
         private bool _isFirst = true;
-
-        private readonly RadialController _controller;
-
-        public RadialBindModel(TriangleData triangle, RadialController controller, RadialBindModel parent)
+        
+        public LinearBindModel(TriangleData triangle, LinearController controller, LinearBindModel parent)
         {
             IsSet = false;
             _triangle = triangle;
@@ -29,14 +28,14 @@ namespace AnimatedMesh.AnimationModels
             }
         }
 
-        protected override RadialBindModel[] GenerateChildren()
+        protected override LinearBindModel[] GenerateChildren()
         {
-            return   SubDivider.SubDivideTriangle(_triangle, this, GetChild); 
+            return SubDivider.SubDivideTriangle(_triangle, this, GetChild);
         }
 
-        protected override RadialBindModel GetChild(TriangleData triangle, RadialBindModel parent)
+        protected override LinearBindModel GetChild(TriangleData triangle, LinearBindModel parent)
         {
-            return new RadialBindModel(triangle, _controller, parent);
+            return new LinearBindModel(triangle, _controller, parent);
         }
 
 
@@ -52,12 +51,13 @@ namespace AnimatedMesh.AnimationModels
             }
             else
             {
-                _radius = direction.GetCentroidRadiusAnimationValue(_targetVertices.GetCentroid());
+                _value = direction.GetCentroidAnimationValue(_targetVertices.GetCentroid());
             }
         }
 
         protected override void UpdateSelf()
         {
+            
             if (_isFirst)
             {
                 _currentVertices.SetToVector((_targetVertices).GetCentroid());
@@ -65,9 +65,9 @@ namespace AnimatedMesh.AnimationModels
             }
             else
             {
-                if(!_controller.IsAbleToTransform(_radius)) return;
-                _currentVertices.Lerp(_targetVertices, Time.deltaTime * RadialController.SPEED);
-                IsSet = _currentVertices.TheSame(_targetVertices, RadialController.DELTA);
+                if (!_controller.IsAbleToTransform(_value)) return;
+                _currentVertices.Lerp(_targetVertices, Time.deltaTime * LinearController.SPEED);
+                IsSet = _currentVertices.TheSame(_targetVertices, LinearController.DELTA);
                 if (IsSet) _currentVertices = _targetVertices;
             }
             SetVertices(_currentVertices);
@@ -81,3 +81,4 @@ namespace AnimatedMesh.AnimationModels
         }
     }
 }
+

@@ -3,15 +3,15 @@ using UnityEngine;
 
 namespace AnimatedMesh.AnimationModels
 {
-    public class RadialBreakModel : AnimatedModelBase<RadialBreakModel>
+    public class LinearBreakModel : AnimatedModelBase<LinearBreakModel>
     {
         private float _radius = 0.0f;
         private TriangleVertices _currentVertices;
         private readonly Vector3 _centroidVector;
-        private readonly RadialController _controller;
+        private readonly LinearController _controller;
         private bool _isBroken = false;
 
-        public RadialBreakModel(TriangleData triangle, RadialController controller, RadialBreakModel parent)
+        public LinearBreakModel(TriangleData triangle, LinearController controller, LinearBreakModel parent)
         {
             IsSet = false;
             _triangle = triangle;
@@ -36,14 +36,14 @@ namespace AnimatedMesh.AnimationModels
             }
         }
 
-        protected override RadialBreakModel[] GenerateChildren()
+        protected override LinearBreakModel[] GenerateChildren()
         {
             return SubDivider.SubDivideTriangle(_triangle, this, GetChild);
         }
 
-        protected override RadialBreakModel GetChild(TriangleData triangle, RadialBreakModel parent)
+        protected override LinearBreakModel GetChild(TriangleData triangle, LinearBreakModel parent)
         {
-            return new RadialBreakModel(triangle, _controller, parent);
+            return new LinearBreakModel(triangle, _controller, parent);
         }
 
 
@@ -59,17 +59,17 @@ namespace AnimatedMesh.AnimationModels
             }
             else
             {
-                _radius = direction.GetCentroidRadiusAnimationValue(_centroidVector);
+                _radius = direction.GetCentroidAnimationValue(_currentVertices.GetCentroid());
             }
         }
 
         public override void UpdateModel()
         {
-            if(IsSet)return;
+            if (IsSet) return;
 
             if (_hasChildren && !_isBroken)
             {
-                if(IsReadyToBreak()) Break();
+                if (IsReadyToBreak()) Break();
             }
 
             base.UpdateModel();

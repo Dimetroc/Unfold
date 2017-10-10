@@ -24,7 +24,7 @@ namespace Unfold
         private bool _allAreSet = false;
         private float _directionValue = 0;
 
-        private RadialController _radialController;
+        private LinearController _radialController;
 
         [SerializeField] private Vector3 _direction;
         [SerializeField] private float _minimalArea = 1;
@@ -36,7 +36,7 @@ namespace Unfold
 
             _meshFilter = GetComponent<MeshFilter>();
 
-            _radialController = new RadialController(_meshFilter, RadialController.RadialType.Inward, false);
+            _radialController = new LinearController(_meshFilter, new Vector3(-1,1,0), false);
             return;
             _mesh = _meshFilter.mesh;
             _originalMeshData = new MeshData(_mesh);

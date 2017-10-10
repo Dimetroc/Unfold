@@ -5,37 +5,31 @@ using UnityEngine;
 
 namespace AnimatedMesh.AnimationModels
 {
-    public class RadialController: AnimatedControllerBase
+    public class LinearController : AnimatedControllerBase
     {
-        public enum RadialType
-        {
-            Inward,
-            Outward
-        }
-
         private UnfoldDirection _unfoldDirection;
         private bool _allAreSet = false;
         private float _unfoldSpeed = 5.0f;
-        public const float DELTA = 0.1f;
-        public const float SPEED = 10.0f;
+        public const float DELTA = 0.01f;
+        public const float SPEED = 5.0f;
 
-        private float _unfoldRadius;
-        private readonly RadialType _type;
-        protected List<RadialBindModel> _bindModels;
-        protected List<RadialBreakModel> _breakModels;
+        private float _unfoldValue;
+        protected List<LinearBindModel> _bindModels;
+        protected List<LinearBreakModel> _breakModels;
         private const float MIN_AREA = 0.2f;
         public TrianglesPool Pool { get { return _trianglesPool; } }
-        
+
+        private Vector3 _direction;
+
         public bool IsFolding { get; private set; }
 
-        public RadialController(MeshFilter meshFilter, RadialType type, bool isFolding) : base(meshFilter)
+        public LinearController(MeshFilter meshFilter, Vector3 direction, bool isFolding) : base(meshFilter)
         {
             IsFolding = isFolding;
-            _type = type;
-            
+            _direction = direction.normalized;
             FillModels();
             ProcessDirection();
-            _unfoldRadius = _type == RadialType.Inward? _unfoldDirection.Min:_unfoldDirection.Max;
+            _unfoldValue =  _unfoldDirection.Min;
         }
 
         private void FillModels()
@@ -52,7 +46,7 @@ namespace AnimatedMesh.AnimationModels
 
         private void ProcessDirection()
         {
-            _unfoldDirection = new UnfoldDirection(Vector3.up);
+            _unfoldDirection = new UnfoldDirection(_direction);
             if (IsFolding)
             {
                 foreach (var triangle in _bindModels)
@@ -69,25 +63,25 @@ namespace AnimatedMesh.AnimationModels
             }
         }
 
-        protected List<RadialBindModel> GenerateBindTriangles()
+        protected List<LinearBindModel> GenerateBindTriangles()
         {
-            var models = new List<RadialBindModel>();
+            var models = new List<LinearBindModel>();
 
             for (int i = 0; i < _originalMeshData.Triangles.Count; i += 3)
             {
-                models.Add(new RadialBindModel(new TriangleData(_originalMeshData, i), this, null));
+                models.Add(new LinearBindModel(new TriangleData(_originalMeshData, i), this, null));
             }
 
             return models;
         }
 
-        protected List<RadialBreakModel> GenerateBreakTriangles()
+        protected List<LinearBreakModel> GenerateBreakTriangles()
         {
-            var models = new List<RadialBreakModel>();
+            var models = new List<LinearBreakModel>();
 
             for (int i = 0; i < _originalMeshData.Triangles.Count; i += 3)
             {
-                models.Add(new RadialBreakModel(new TriangleData(_originalMeshData, i), this, null));
+                models.Add(new LinearBreakModel(new TriangleData(_originalMeshData, i), this, null));
             }
 
             return models;
@@ -98,10 +92,10 @@ namespace AnimatedMesh.AnimationModels
         public override void UpdateMeshTriangles()
         {
             if (_allAreSet) return;
-            _unfoldRadius += (_type == RadialType.Outward? -1:1) * Time.deltaTime * _unfoldSpeed;
+            _unfoldValue += Time.deltaTime * _unfoldSpeed;
             _allAreSet = UpdateTriangles();
             UpdateMeshWithNewMeshData();
-            if(_allAreSet && IsFolding) SetOriginalMeshData();
+            if (_allAreSet && IsFolding) SetOriginalMeshData();
         }
 
         public bool IsAbleToHaveChildren(TriangleVertices vertices)
@@ -109,18 +103,9 @@ namespace AnimatedMesh.AnimationModels
             return vertices.GetArea() > MIN_AREA;
         }
 
-        public bool IsAbleToTransform(float radius)
+        public bool IsAbleToTransform(float value)
         {
-            if (_type == RadialController.RadialType.Inward)
-            {
-                if (_unfoldRadius < radius) return false;
-            }
-            else
-            {
-                if (_unfoldRadius > radius) return false;
-            }
-
-            return true;
+            return value < _unfoldValue;
         }
 
         private bool UpdateTriangles()
@@ -148,3 +133,4 @@ namespace AnimatedMesh.AnimationModels
         }
     }
 }
+
