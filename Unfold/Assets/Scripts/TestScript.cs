@@ -9,6 +9,7 @@ public class TestScript : MonoBehaviour
 	[SerializeField] private Button _directButton;
 	[SerializeField] private Button _radialButton;
 	[SerializeField] private Button _randomButton;
+	[SerializeField] private Button _heightMapButton;
 	[SerializeField] private Toggle _unfoldToggle;
 	[SerializeField] private Button _playButton;
 
@@ -19,13 +20,14 @@ public class TestScript : MonoBehaviour
 		public AnimationType Type;
 		public bool Unfold;
 	}
-	private Queue<PlayData> _playData = new Queue<PlayData>();
+	private readonly Queue<PlayData> _playData = new Queue<PlayData>();
 
 	private void Awake()
 	{
 		_directButton.onClick.AddListener(OnDirectButtonClicked);
 		_radialButton.onClick.AddListener(OnRadialButtonClicked);
 		_randomButton.onClick.AddListener(OnRandomButtonClicked);
+		_heightMapButton.onClick.AddListener(OnHeightMapButtonClicked);
 		_animatedMesh.AnimationFinished += OnAnimationFinished;
 		_playButton.onClick.AddListener(OnPlayButtonClicked);
 	}
@@ -53,6 +55,15 @@ public class TestScript : MonoBehaviour
 		_playData.Enqueue(new PlayData()
 		{
 			Type = AnimationType.Random,
+			Unfold = _unfoldToggle.isOn
+		});
+	}
+
+	private void OnHeightMapButtonClicked()
+	{
+		_playData.Enqueue(new PlayData()
+		{
+			Type = AnimationType.HeightMap,
 			Unfold = _unfoldToggle.isOn
 		});
 	}

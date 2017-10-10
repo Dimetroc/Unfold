@@ -32,6 +32,8 @@ namespace Unfold
         public float MinimalArea = 1;
         [SerializeField]
         public float UnfoldSpeed = 10.0f;
+	    [SerializeField]
+		private Texture2D _heightMap;
         #endregion
 
         private void Awake()
@@ -62,6 +64,9 @@ namespace Unfold
                     break;
 				case AnimationType.Random:
 					_meshAnimator = new RandomMeshAnimator(_smartTriangles, Offset, unfold, _meshFilter);
+					break;
+				case AnimationType.HeightMap:
+					_meshAnimator = new HeightMapMeshAnimator(_smartTriangles, _heightMap, unfold, _meshFilter);
 					break;
             }
             StartCoroutine(AnimationRoutine());

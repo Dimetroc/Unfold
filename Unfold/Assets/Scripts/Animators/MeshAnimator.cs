@@ -8,7 +8,8 @@ namespace Unfold
 	{
 		Direct,
 		Radial,
-		Random
+		Random,
+		HeightMap
 	}
 
 	public abstract class MeshAnimator
