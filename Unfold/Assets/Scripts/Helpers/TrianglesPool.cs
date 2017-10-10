@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 
 namespace Unfold
 {
@@ -36,19 +35,5 @@ namespace Unfold
                 _triangles.Enqueue(new MeshTriangle(_meshData));
             }
         }
-
-	    public Vector3 GetCenter()
-	    {
-		    var xSum = 0f;
-		    var ySum = 0f;
-		    var zSum = 0f;
-		    foreach (var triangle in _triangles)
-		    {
-			    xSum += triangle.GetCentroid().x;
-			    ySum += triangle.GetCentroid().y;
-			    zSum += triangle.GetCentroid().z;
-		    }
-		    return new Vector3(xSum / _triangles.Count, ySum / _triangles.Count, zSum / _triangles.Count);
-	    }
 	}
 }

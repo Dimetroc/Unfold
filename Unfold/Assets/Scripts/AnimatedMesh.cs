@@ -28,7 +28,7 @@ namespace Unfold
         [SerializeField] 
         private bool ToCenter;
         [SerializeField]
-        public bool Inverse;
+        public bool Unfold;
         [SerializeField]
         public float MinimalArea = 1;
         [SerializeField]
@@ -56,10 +56,10 @@ namespace Unfold
             switch (AnimationType)
             {
                 case AnimationType.Direct:
-                    _meshAnimator = new DirectMeshAnimator(_smartTriangles, Direction, Offset, Inverse, _meshFilter);
+                    _meshAnimator = new DirectMeshAnimator(_smartTriangles, Direction, Offset, Unfold, _meshFilter);
                     break;
                 case AnimationType.Radial:
-                    _meshAnimator = new RadialMeshAnimator(_smartTriangles, ToCenter, _trianglesPool.GetCenter(), Inverse, Offset, _meshFilter);
+                    _meshAnimator = new RadialMeshAnimator(_smartTriangles, ToCenter, Unfold, Offset, _meshFilter);
                     break;
             }
             StartCoroutine(AnimationRoutine());
