@@ -1,10 +1,11 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Unfold
 {
     public static class SubDivider
     {
-        public static T[] SubDivideTriangle<T>(TriangleData triangle, Func<TriangleData, T> getChild)
+        public static T[] SubDivideTriangle<T>(TriangleData triangle, T parent, Func<TriangleData, T, T> getChild)
         {
             var tds = new[] { new TriangleData(), new TriangleData(), new TriangleData(), new TriangleData() };
 
@@ -17,7 +18,7 @@ namespace Unfold
 
             for (int i = 0; i < triangles.Length; i++)
             {
-                triangles[i] = getChild(tds[i]);
+                triangles[i] = getChild(tds[i], parent);
             }
 
             return triangles;
@@ -136,7 +137,11 @@ namespace Unfold
             return (a.V0 - b.V0).sqrMagnitude < sqrDelta && (a.V1 - b.V1).sqrMagnitude < sqrDelta && (a.V2 - b.V2).sqrMagnitude < sqrDelta;
         }
 
-
+        public static bool AllAreAtTheVector(this TriangleVertices a, Vector3 b, float delta)
+        {
+            var sqrDelta = delta * delta;
+            return (a.V0 - b).sqrMagnitude < sqrDelta && (a.V1 - b).sqrMagnitude < sqrDelta && (a.V2 - b).sqrMagnitude < sqrDelta;
+        }
 
 
 

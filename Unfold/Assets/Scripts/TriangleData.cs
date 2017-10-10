@@ -123,6 +123,13 @@ namespace Unfold
             V2 = Vector3.Lerp(V2, to.V2, fraction);
         }
 
+        public void LerpToVector(Vector3 to, float fraction)
+        {
+            V0 = Vector3.Lerp(V0, to, fraction);
+            V1 = Vector3.Lerp(V1, to, fraction);
+            V2 = Vector3.Lerp(V2, to, fraction);
+        }
+
         public Vector3 GetCentroid()
         {
             return new Vector3((V0.x + V1.x + V2.x)/3.0f, (V0.y+ V1.y + V2.y) / 3.0f, (V0.z + V1.z + V2.z) / 3.0f);

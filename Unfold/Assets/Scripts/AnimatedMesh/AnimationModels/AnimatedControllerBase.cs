@@ -6,11 +6,10 @@ using UnityEngine;
 
 namespace AnimatedMesh
 {
-    public abstract class AnimatedControllerBase<T> where T:AnimatedModelBase<T>
+    public abstract class AnimatedControllerBase 
     {
         private readonly MeshFilter _meshFilter;
         protected TrianglesPool _trianglesPool;
-        protected List<T> _radialModelBases;
         protected MeshData _originalMeshData;
         protected MeshData _newMeshData;
 
@@ -27,21 +26,7 @@ namespace AnimatedMesh
 
         }
 
-        protected void GenerateTriangles()
-        {
-            _radialModelBases = new List<T>();
-
-            for (int i = 0; i < _originalMeshData.Triangles.Count; i += 3)
-            {
-                _radialModelBases.Add(GetModel(i));
-            }
-        }
-
-        protected abstract T GetModel(int index);
-
         public abstract void UpdateMeshTriangles();
-
-
 
         protected void UpdateMeshWithNewMeshData()
         {

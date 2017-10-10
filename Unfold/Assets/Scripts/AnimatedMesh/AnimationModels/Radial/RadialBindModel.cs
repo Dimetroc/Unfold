@@ -3,50 +3,47 @@ using UnityEngine;
 
 namespace AnimatedMesh.AnimationModels
 {
-    public class RadialModel:AnimatedModelBase<RadialModel>
+    public class RadialBindModel:AnimatedModelBase<RadialBindModel>
     {
 
         private const float DELTA = 0.1f;
         private const float SPEED = 10.0f;
         private float _radius = 0.0f;
-        private float _unfoldRadius = 0.0f;
         private TriangleVertices _currentVertices;
+        private TriangleVertices _targetVertices;
         private bool _isFirst = true;
-        private RadialController.RadialType _radialType;
-        private readonly float _minArea;
 
-        public RadialModel(TriangleData triangle, TrianglesPool pool, RadialController.RadialType type, float minimumArea)
+        private readonly RadialController _controller;
+
+        public RadialBindModel(TriangleData triangle, RadialController controller, RadialBindModel parent)
         {
             IsSet = false;
             _triangle = triangle;
-            _minArea = minimumArea;
-            _currentVertices = _targetVertices = new TriangleVertices(_triangle);
-            _pool = pool;
-            _radialType = type;
+            _controller = controller;
+            _pool = controller.Pool;
+            _parent = parent;
 
-            _hasChildren = _targetVertices.GetArea() > minimumArea;
+            _currentVertices = _targetVertices = new TriangleVertices(_triangle);
+
+            _hasChildren = _controller.IsAbleToHaveChildren(_currentVertices);
             if (_hasChildren)
             {
                 SetChildren();
             }
         }
 
-        protected override RadialModel[] GenerateChildren()
+        protected override RadialBindModel[] GenerateChildren()
         {
-            return   SubDivider.SubDivideTriangle(_triangle, GetChild); 
+            return   SubDivider.SubDivideTriangle(_triangle, this, GetChild); 
         }
 
-        protected override RadialModel GetChild(TriangleData triangle)
+        protected override RadialBindModel GetChild(TriangleData triangle, RadialBindModel parent)
         {
-            return new RadialModel(triangle, _pool, _radialType, _minArea);
+            return new RadialBindModel(triangle, _controller, parent);
         }
 
-        public void UpdateModel(float radius)
-        {
-            _unfoldRadius = radius;
-            UpdateMeshData();
-        }
 
+        //TODO
         public void UpdateUnfoldDirection(UnfoldDirection direction)
         {
             if (_hasChildren)
@@ -62,11 +59,6 @@ namespace AnimatedMesh.AnimationModels
             }
         }
 
-        protected override void UpdateChild(RadialModel child)
-        {
-            child.UpdateModel(_unfoldRadius);
-        }
-
         protected override void UpdateSelf()
         {
             if (_isFirst)
@@ -76,21 +68,19 @@ namespace AnimatedMesh.AnimationModels
             }
             else
             {
-                if (_radialType == RadialController.RadialType.Inward)
-                {
-                    if (_unfoldRadius < _radius) return;
-                }
-                else
-                {
-                    if (_unfoldRadius > _radius) return;
-                }
-                
-
+                if(!_controller.IsAbleToBreak(_radius)) return;
                 _currentVertices.Lerp(_targetVertices, Time.deltaTime * SPEED);
                 IsSet = _currentVertices.TheSame(_targetVertices, DELTA);
                 if (IsSet) _currentVertices = _targetVertices;
             }
             SetVertices(_currentVertices);
+        }
+
+        protected override void AllChildrenAreSet()
+        {
+            ClearChildren();
+            SetVertices(_targetVertices);
+            IsSet = true;
         }
     }
 }

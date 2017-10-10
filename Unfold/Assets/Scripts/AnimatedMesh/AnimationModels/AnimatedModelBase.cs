@@ -2,7 +2,7 @@
 
 namespace AnimatedMesh.AnimationModels
 {
-    public abstract class AnimatedModelBase<T> where T:AnimatedModelBase<T>
+    public abstract class AnimatedModelBase<T>:IAnimatedModel where T:AnimatedModelBase<T>
     {
         public bool IsSet { get; protected set; }
 
@@ -10,8 +10,8 @@ namespace AnimatedMesh.AnimationModels
         protected MeshTriangle _meshTriangle;
 
         protected TriangleData _triangle;
-        protected TriangleVertices _targetVertices;
         protected T[] _children;
+        protected T _parent;
         protected bool _hasChildren = false;
 
         protected void SetChildren()
@@ -21,7 +21,7 @@ namespace AnimatedMesh.AnimationModels
 
         protected abstract T[] GenerateChildren();
 
-        protected abstract T GetChild(TriangleData triangle);
+        protected abstract T GetChild(TriangleData triangle, T parent);
 
         public void Clear()
         {
@@ -30,10 +30,19 @@ namespace AnimatedMesh.AnimationModels
                 ClearChildren();
             }
 
-            _meshTriangle.ClearTriangle();
-            _pool.ReturnTriangle(_meshTriangle);
+            ClearTriangle();
             _pool = null;
-            _meshTriangle = null;
+
+        }
+
+        protected void ClearTriangle()
+        {
+            if (_meshTriangle != null)
+            {
+                _meshTriangle.ClearTriangle();
+                _pool.ReturnTriangle(_meshTriangle);
+                _meshTriangle = null;
+            }
         }
 
         protected void ClearChildren()
@@ -46,7 +55,7 @@ namespace AnimatedMesh.AnimationModels
             _hasChildren = false;
         }
 
-        protected void UpdateMeshData()
+        public virtual void UpdateModel()
         {
             if (IsSet) return;
 
@@ -62,29 +71,23 @@ namespace AnimatedMesh.AnimationModels
 
         private void UpdateChildren()
         {
-            IsSet = true;
+            var allChildrenSet = true;
 
             for (int i = 0; i < _children.Length; i++)
             {
-                UpdateChild(_children[i]);
-                IsSet = _children[i].IsSet && IsSet;
+                _children[i].UpdateModel();
+                allChildrenSet = _children[i].IsSet && allChildrenSet;
             }
 
-            if (IsSet)
+            if (allChildrenSet)
             {
-                Combine();
+                AllChildrenAreSet();
             }
         }
-
-        protected abstract void UpdateChild(T child);
 
         protected abstract void UpdateSelf();
 
-        private void Combine()
-        {
-            ClearChildren();
-            SetVertices(_targetVertices);
-        }
+        protected abstract void AllChildrenAreSet();
 
         protected void SetVertices(TriangleVertices vertices)
         {
