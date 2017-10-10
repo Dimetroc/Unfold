@@ -11,7 +11,7 @@ namespace Unfold
         {
             _targetMeshData = targetData;
             _triangleData = new TriangleData(_targetMeshData.GetStartIndex());
-            _targetMeshData.SetTriangle(_triangleData);
+            _targetMeshData.AddTriangle(_triangleData);
         }
 
         public void UseTriangle(TriangleData triangleData)
@@ -28,9 +28,9 @@ namespace Unfold
 
         public void ClearTriangle()
         {
-            _triangleData.ClearData();
+			_triangleData.ClearData();
             _targetMeshData.UpdateTriangleData(_triangleData);
-        }
+		}
 
 	    public Vector3 GetCentroid()
 	    {

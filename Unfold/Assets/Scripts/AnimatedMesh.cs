@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -8,6 +9,8 @@ namespace Unfold
     [RequireComponent(typeof (MeshFilter))]
     public class AnimatedMesh : MonoBehaviour
     {
+	    public event Action AnimationFinished = delegate { };
+
         private MeshFilter _meshFilter;
         private Mesh _mesh;
 
@@ -19,16 +22,12 @@ namespace Unfold
         private List<SmartTriangle> _smartTriangles;
 
         #region Settings
-        [SerializeField] 
-        public AnimationType AnimationType;
         [SerializeField]
         public Vector3 Direction;
         [SerializeField] 
         public Vector3 Offset;
         [SerializeField] 
         private bool ToCenter;
-        [SerializeField]
-        public bool Unfold;
         [SerializeField]
         public float MinimalArea = 1;
         [SerializeField]
@@ -38,36 +37,40 @@ namespace Unfold
         private void Awake()
         {
             _meshFilter = GetComponent<MeshFilter>();
-            _mesh = _meshFilter.mesh;
-            _originalMeshData = new MeshData(_mesh);
-            _newMeshData = new MeshData();
-            _trianglesPool = new TrianglesPool(_newMeshData);
-            StartAnimation();
-        }
+			_mesh = _meshFilter.mesh;
+	        _originalMeshData = new MeshData(_mesh);
+		}
 
-        private void StartAnimation()
+        public void StartAnimation(AnimationType animationType, bool unfold)
         {
-            _smartTriangles = new List<SmartTriangle>();
+	        _meshFilter.mesh = _mesh;
+			_newMeshData = new MeshData();
+	        _trianglesPool = new TrianglesPool(_newMeshData);
+			_smartTriangles = new List<SmartTriangle>();
             for (var i = 0; i < _originalMeshData.Triangles.Count; i += 3)
             {
                 _smartTriangles.Add(new SmartTriangle(new TriangleData(_originalMeshData, i), _trianglesPool,
                     MinimalArea));
             }
-            switch (AnimationType)
+            switch (animationType)
             {
                 case AnimationType.Direct:
-                    _meshAnimator = new DirectMeshAnimator(_smartTriangles, Direction, Offset, Unfold, _meshFilter);
+                    _meshAnimator = new DirectMeshAnimator(_smartTriangles, Direction, Offset, unfold, _meshFilter);
                     break;
                 case AnimationType.Radial:
-                    _meshAnimator = new RadialMeshAnimator(_smartTriangles, ToCenter, Unfold, Offset, _meshFilter);
+                    _meshAnimator = new RadialMeshAnimator(_smartTriangles, ToCenter, unfold, Offset, _meshFilter);
                     break;
 				case AnimationType.Random:
-					_meshAnimator = new RandomMeshAnimator(_smartTriangles, Offset, Unfold, _meshFilter);
+					_meshAnimator = new RandomMeshAnimator(_smartTriangles, Offset, unfold, _meshFilter);
 					break;
             }
             StartCoroutine(AnimationRoutine());
         }
 
+	    private void Reset()
+	    {
+		    
+	    }
 
         private IEnumerator AnimationRoutine()
         {
@@ -87,8 +90,8 @@ namespace Unfold
                 yield return null;
             }
 	        _meshAnimator.End();
-
-		}
+	        AnimationFinished();
+        }
 
         private bool UpdateTriangles(float directionValue)
         {

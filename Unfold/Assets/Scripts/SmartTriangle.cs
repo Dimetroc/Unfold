@@ -15,7 +15,7 @@ namespace Unfold
         private bool _hasChildren;
 	    private bool _isComplete;
 
-	    public bool Optimize;
+	    private bool _optimize;
 
 	    private const float DELTA = 0.1f;
 	    private const float SPEED = 10.0f;//TODO to setup parameters
@@ -32,18 +32,19 @@ namespace Unfold
             }
         }
 
-        public void Setup(MeshAnimator meshAnimator)
+        public void Setup(MeshAnimator meshAnimator, bool optimize)
         {
             if (_hasChildren)
             {
                 foreach (var child in _children)
                 {
-                    child.Setup(meshAnimator);
-                }
-            }
+                    child.Setup(meshAnimator, optimize);
+				}
+	            _optimize = optimize;
+			}
             else
             {
-                _canMoveValue = meshAnimator.GetAnimationValue(_targetTriangle.GetCentroid());
+				_canMoveValue = meshAnimator.GetAnimationValue(_targetTriangle.GetCentroid());
             }
         }
 
@@ -153,11 +154,11 @@ namespace Unfold
 
 	    private void Combine()
 	    {
-		    if (!Optimize)
-		    {
-			    return;
-		    }
-            if (_children == null || _children.Length == 0)
+			if (!_optimize)
+			{
+				return;
+			}
+			if (_children == null || _children.Length == 0)
             {
                 return;
             }
@@ -186,8 +187,7 @@ namespace Unfold
             {
                 ClearChildren();
             }
-
-            _meshTriangle.ClearTriangle();
+			_meshTriangle.ClearTriangle();
             _pool.ReturnTriangle(_meshTriangle);
             _pool = null;
             _meshTriangle = null;

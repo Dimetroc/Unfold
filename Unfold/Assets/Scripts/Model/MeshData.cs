@@ -35,7 +35,7 @@ namespace Unfold
             return Triangles.Count;
         }
 
-        public void SetTriangle(TriangleData triangle)
+        public void AddTriangle(TriangleData triangle)
         {
             Triangles.Add(triangle.T0);
             Triangles.Add(triangle.T1);
@@ -52,7 +52,7 @@ namespace Unfold
             Uvs.Add(triangle.Uv0);
             Uvs.Add(triangle.Uv1);
             Uvs.Add(triangle.Uv2);
-        }
+		}
 
         public void UpdateTriangleData(TriangleData triangle)
         {
@@ -82,7 +82,5 @@ namespace Unfold
             Vertices[triangle.T1] = Vector3.zero;
             Vertices[triangle.T2] = Vector3.zero;
         }
-
-
     }
 }

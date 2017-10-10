@@ -29,9 +29,8 @@ namespace Unfold
             }
             foreach (var st in SmartTriangles)
             {
-	            st.Optimize = !_unfold;
-                st.Setup(this);
-                if (_unfold)
+				st.Setup(this, !_unfold);
+				if (_unfold)
                 {
                     st.Show();
 					st.ChangeTargetPosition(_offset);

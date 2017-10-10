@@ -5,10 +5,10 @@ namespace Unfold
     public class TrianglesPool
     {
         private readonly MeshData _meshData;
-        private const int EXPAND_AMOUNT = 10;
         private readonly Queue<MeshTriangle> _triangles;
+	    private const int EXPAND_AMOUNT = 10;
 
-        public TrianglesPool(MeshData meshData)
+		public TrianglesPool(MeshData meshData)
         {
             _triangles = new Queue<MeshTriangle>();
             _meshData = meshData;
