@@ -31,11 +31,11 @@ namespace Unfold
 				if (_unfold)
 				{
 					st.Show();
-					//st.ChangeTargetPosition(_offset);
+					st.ChangeTargetPosition(new Vector3(0, 1, 0));
 				}
 				else
 				{
-					//st.ChangeCurrentPosition(_offset);
+					st.ChangeCurrentPosition(new Vector3(0, 1, 0));
 				}
 			}
 		}
@@ -48,25 +48,23 @@ namespace Unfold
 			}
 		}
 
+		private float Linear(float x, float x0, float x1, float y0, float y1)
+		{
+			if ((x1 - x0) == 0)
+			{
+				return (y0 + y1) / 2;
+			}
+			return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
+		}
+
 		public override float GetAnimationValue(Vector3 centroid)
 		{
-			var magtinude = (centroid - _center).magnitude;
-			for (int i = 0; i < _heightMap.width; i++)
-			{
-				for (int j = 0; j < _heightMap.height; j++)
-				{
-					if (magtinude > (i + j)/100f)
-					{
-						return _heightMap.GetPixel(i, j).grayscale;
-					}
-				}
-			}
-			return 1;
-			//if (_toCenter)
-			{
-				return GetAnimationValue(centroid, (_center - centroid).normalized);
-			}
-			return GetAnimationValue(centroid, (centroid - _center).normalized);
+			var valueRight = GetAnimationValue(centroid, new Vector3(1, 0, 0).normalized);
+			var tWidth = Linear(valueRight, MinValue, MaxValue, 0, _heightMap.width);
+			var valueTop = GetAnimationValue(centroid, new Vector3(0, 1, 0).normalized);
+			var tHeight = Linear(valueTop, MinValue, MaxValue, 0, _heightMap.height);
+			var grayscale = _heightMap.GetPixel((int)tWidth, (int)tHeight).grayscale;
+			return MaxValue + grayscale * (MinValue - MaxValue);
 		}
 	}
 }
