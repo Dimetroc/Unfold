@@ -24,11 +24,12 @@ namespace Unfold
         private bool _allAreSet = false;
         private float _directionValue = 0;
 
-        private LinearController _radialController;
+        private TextureController _radialController;
 
         [SerializeField] private Vector3 _direction;
         [SerializeField] private float _minimalArea = 1;
         [SerializeField] private float _unfoldSpeed = 10.0f;
+        [SerializeField] private Texture2D _texture;
          
         private void Awake()
         {
@@ -36,7 +37,7 @@ namespace Unfold
 
             _meshFilter = GetComponent<MeshFilter>();
 
-            _radialController = new LinearController(_meshFilter, new Vector3(-1,1,0), false);
+            _radialController = new TextureController(_meshFilter, _texture, false);
             return;
             _mesh = _meshFilter.mesh;
             _originalMeshData = new MeshData(_mesh);
